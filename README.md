@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BBST Magazine Platform
 
-## Getting Started
+A maintainable, secure, and production-oriented digital magazine platform built with modern web technologies.
 
-First, run the development server:
+## Technology Stack
+
+- **Framework**: Next.js (App Router, React Server Components)
+- **Language**: Strict TypeScript
+- **Styling**: Tailwind CSS, shadcn/ui, Lucide React, Motion
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: Better Auth
+- **Validation**: Zod and React Hook Form
+- **Storage**: Cloudinary (for PDFs and images)
+- **Editor**: Tiptap (Rich-text editor)
+
+## Features
+
+- **Public Website**:
+  - Responsive homepage with an editorial hero section
+  - Featured and recent magazine issues
+  - Magazine listing and detail pages with PDF viewing and downloading
+  - Article listing, detail pages, categories, and search
+  - SEO optimization and accessible navigation
+- **Admin Dashboard**:
+  - Secure authentication and role-based access control (Admin, Editor)
+  - Magazine management (create, edit, publish, archive, delete)
+  - Article management with a rich-text editor
+  - Category management
+  - User-role management (Admins only)
+
+## Prerequisites
+
+- Node.js (v18 or newer)
+- PostgreSQL database
+- Cloudinary account for media storage
+
+## Installation
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Set up environment variables:
+Copy `.env.example` to `.env` and fill in the required values:
+
+```bash
+cp .env.example .env
+```
+
+3. Database setup:
+Apply Prisma migrations and generate the Prisma Client:
+
+```bash
+npx prisma generate
+npx prisma db push
+# or npx prisma migrate dev
+```
+
+4. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Core Packages
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The following essential packages are used in this project (as listed in `package.json`):
 
-## Learn More
+- `next` and `react`
+- `@prisma/client`, `@prisma/adapter-pg`, and `pg`
+- `better-auth`
+- `zod`, `react-hook-form`, and `@hookform/resolvers`
+- `cloudinary`
+- `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`
+- `tailwindcss`, `lucide-react`, `framer-motion`, `shadcn`
 
-To learn more about Next.js, take a look at the following resources:
+## Documentation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `AGENTS.md`: Contains essential rules for architecture, database, security, and project guidelines.
