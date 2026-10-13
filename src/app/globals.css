@@ -8,6 +8,7 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
+  --font-caveat: var(--font-caveat);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -57,5 +58,84 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1.5deg);
+  }
+}
+
+@keyframes leafDrift1 {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(12px, 18px) rotate(15deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(0px, 0px) rotate(0deg);
+    opacity: 0.7;
+  }
+}
+
+@keyframes leafDrift2 {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-14px, 22px) rotate(-18deg);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(0px, 0px) rotate(0deg);
+    opacity: 0.6;
+  }
+}
+
+@keyframes leafDrift3 {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translate(16px, -15px) rotate(22deg);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(0px, 0px) rotate(0deg);
+    opacity: 0.65;
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.animate-leaf-1 {
+  animation: leafDrift1 8s ease-in-out infinite;
+}
+
+.animate-leaf-2 {
+  animation: leafDrift2 11s ease-in-out infinite;
+}
+
+.animate-leaf-3 {
+  animation: leafDrift3 9s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-slow,
+  .animate-leaf-1,
+  .animate-leaf-2,
+  .animate-leaf-3 {
+    animation: none !important;
   }
 }

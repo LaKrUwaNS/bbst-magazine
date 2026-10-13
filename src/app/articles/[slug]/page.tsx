@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 
@@ -30,7 +31,14 @@ export default async function ArticleDetailPage({
       
       {article.coverImage && (
         <div className="my-6">
-          <img src={article.coverImage} alt={article.title} className="max-w-full h-auto rounded-md" />
+          <Image
+            src={article.coverImage}
+            alt={article.title}
+            width={800}
+            height={450}
+            priority
+            className="max-w-full h-auto rounded-md"
+          />
         </div>
       )}
 

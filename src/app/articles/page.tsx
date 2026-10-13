@@ -7,13 +7,20 @@ export const instant = false;
 export default async function ArticlesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; q?: string }>;
 }) {
-  const { category } = await searchParams;
+  const { category, q } = await searchParams;
 
   const whereClause: Prisma.ArticleWhereInput = { status: "published" };
   if (category) {
     whereClause.category = { slug: category };
+  }
+  if (q) {
+    whereClause.OR = [
+      { title: { contains: q, mode: "insensitive" } },
+      { excerpt: { contains: q, mode: "insensitive" } },
+      { content: { contains: q, mode: "insensitive" } },
+    ];
   }
 
   const articles = await prisma.article.findMany({
@@ -23,11 +30,16 @@ export default async function ArticlesPage({
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-5xl mx-auto py-6 px-4 sm:px-6">
       <h1 className="text-3xl font-bold border-b border-gray-200 pb-2">Articles</h1>
-      {category && (
-        <p className="text-gray-600">Showing articles in category: {category}</p>
-      )}
+      <div className="flex flex-wrap gap-2 text-sm text-gray-600">
+        {category && (
+          <p className="bg-gray-100 px-3 py-1 rounded-full">Category: <span className="font-semibold text-gray-900">{category}</span></p>
+        )}
+        {q && (
+          <p className="bg-emerald-50 text-emerald-900 px-3 py-1 rounded-full border border-emerald-200">Search results for: <span className="font-semibold text-[#171717]">&ldquo;{q}&rdquo;</span></p>
+        )}
+      </div>
 
       {articles.length > 0 ? (
         <ul className="space-y-6">

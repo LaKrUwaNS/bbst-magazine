@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 
 export const instant = false;
@@ -18,7 +19,15 @@ export default async function MagazinesPage() {
           {magazines.map((magazine) => (
             <li key={magazine.id} className="border border-gray-200 p-4 rounded-md flex flex-col">
               {magazine.coverImage && (
-                <img src={magazine.coverImage} alt={magazine.title} className="mb-4 h-48 object-cover rounded-sm bg-gray-100" />
+                <div className="relative mb-4 h-48 w-full overflow-hidden rounded-sm bg-gray-100">
+                  <Image
+                    src={magazine.coverImage}
+                    alt={magazine.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                </div>
               )}
               <h2 className="text-xl font-bold mb-2">
                 <Link href={`/magazines/${magazine.slug}`} className="hover:underline">
