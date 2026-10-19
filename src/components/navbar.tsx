@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Search, Menu, X, ArrowRight } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 import { SubmitArticleDialog } from "@/components/submit-article-dialog";
 
 const NAV_LINKS = [
@@ -18,9 +19,11 @@ const NAV_LINKS = [
 export function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
+  const shouldReduceMotion = useReducedMotion();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+  const [hoveredLink, setHoveredLink] = useState<string | null>(null);
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,27 +81,55 @@ export function Navbar() {
               </div>
             </Link>
 
-            {/* Center Navigation Links */}
+            {/* Center Navigation Links with Glass Animation */}
             <nav
               aria-label="Main Navigation"
-              className="hidden lg:flex items-center gap-5 xl:gap-6 text-[13px] font-medium"
+              onMouseLeave={() => setHoveredLink(null)}
+              className="relative hidden lg:flex items-center p-1.5 bg-gray-100/80 backdrop-blur-md rounded-full border border-gray-200/80 shadow-2xs gap-1"
             >
               {NAV_LINKS.map((link) => {
-                const isActive = pathname === link.href;
+                const isActive =
+                  pathname === link.href ||
+                  (link.href !== "/" && pathname.startsWith(`${link.href}/`));
+                const isHovered = hoveredLink === link.href;
+
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`transition-colors py-0.5 relative ${
+                    onMouseEnter={() => setHoveredLink(link.href)}
+                    className={`relative flex items-center px-3.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-[13px] font-semibold transition-colors duration-200 whitespace-nowrap cursor-pointer select-none isolate ${
                       isActive
-                        ? "text-[#00C800] font-semibold"
-                        : "hover:text-[#171717] text-gray-700"
+                        ? "text-white font-bold"
+                        : "text-gray-600 hover:text-gray-900"
                     }`}
                   >
-                    {link.label}
+                    {/* Active Tab Spring Indicator Pill */}
                     {isActive && (
-                      <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-5 h-0.5 bg-[#00E500] rounded-full" />
+                      <motion.div
+                        layoutId={shouldReduceMotion ? undefined : "activeNavbarTabPill"}
+                        transition={{
+                          type: "spring",
+                          stiffness: 420,
+                          damping: 32,
+                        }}
+                        className="absolute inset-0 bg-[#00C800] rounded-full shadow-md shadow-[#00C800]/30 -z-10"
+                      />
                     )}
+
+                    {/* Smooth Hover State Indicator Pill */}
+                    {!isActive && isHovered && (
+                      <motion.div
+                        layoutId={shouldReduceMotion ? undefined : "hoverNavbarTabPill"}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute inset-0 bg-white rounded-full shadow-xs -z-10 border border-gray-200/60"
+                      />
+                    )}
+
+                    <span className="relative z-10 tracking-tight">{link.label}</span>
                   </Link>
                 );
               })}
