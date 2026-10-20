@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import type { Prisma, MagazineIssue } from "@prisma/client";
 import { HeroSection } from "@/components/hero-section";
 import { MagazineIntro } from "@/components/intro/magazine-intro";
 import { EditorialScrollExperience } from "@/components/editorial-scroll-experience";
@@ -15,28 +16,42 @@ import {
 
 export const instant = false;
 
+type HomeArticle = Prisma.ArticleGetPayload<{
+  include: { category: true; author: true };
+}>;
+
 export default async function Home() {
-  const [
-    recentArticles,
-    latestMagazine,
-    publishedArticlesCount,
-    publishedMagazinesCount,
-    usersCount,
-  ] = await Promise.all([
-    prisma.article.findMany({
-      where: { status: "published" },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-      include: { category: true, author: true },
-    }),
-    prisma.magazineIssue.findFirst({
-      where: { status: "published" },
-      orderBy: { publicationDate: "desc" },
-    }),
-    prisma.article.count({ where: { status: "published" } }),
-    prisma.magazineIssue.count({ where: { status: "published" } }),
-    prisma.user.count(),
-  ]);
+  let recentArticles: HomeArticle[] = [];
+  let latestMagazine: MagazineIssue | null = null;
+  let publishedArticlesCount = 0;
+  let publishedMagazinesCount = 0;
+  let usersCount = 0;
+
+  try {
+    [
+      recentArticles,
+      latestMagazine,
+      publishedArticlesCount,
+      publishedMagazinesCount,
+      usersCount,
+    ] = await Promise.all([
+      prisma.article.findMany({
+        where: { status: "published" },
+        orderBy: { createdAt: "desc" },
+        take: 6,
+        include: { category: true, author: true },
+      }),
+      prisma.magazineIssue.findFirst({
+        where: { status: "published" },
+        orderBy: { publicationDate: "desc" },
+      }),
+      prisma.article.count({ where: { status: "published" } }),
+      prisma.magazineIssue.count({ where: { status: "published" } }),
+      prisma.user.count(),
+    ]);
+  } catch (error) {
+    console.error("[Home] Failed to load data from database:", error);
+  }
 
   const latestMagazineHref = latestMagazine
     ? `/magazines/${latestMagazine.slug}`
@@ -123,7 +138,7 @@ export default async function Home() {
                 <div className="pt-6 mt-6 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
                   <div className="flex items-center gap-1.5">
                     <UserCheck className="w-3.5 h-3.5 text-gray-400" />
-                    <span>{article.author.name}</span>
+                    <span>{article.author?.name || article.authorName || "BBST Contributor"}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3 h-3 text-gray-400" />

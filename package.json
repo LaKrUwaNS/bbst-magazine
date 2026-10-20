@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "tsx prisma/seed.ts",
+    "hash-password": "node scripts/generate-hash.mjs"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -23,6 +28,7 @@
     "date-fns": "^4.4.0",
     "dotenv": "^18.0.7",
     "framer-motion": "^14.1.0",
+    "isomorphic-dompurify": "^4.6.0",
     "lucide-react": "^1.55.0",
     "next": "16.4.0",
     "pg": "^8.23.1",
@@ -45,6 +51,7 @@
     "eslint-config-next": "16.4.0",
     "prisma": "^7.10.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

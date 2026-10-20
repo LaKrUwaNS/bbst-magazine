@@ -39,6 +39,27 @@ export interface ArticleRepository {
  */
 export class MockArticleRepository implements ArticleRepository {
   async getArticles(params?: GetArticlesParams): Promise<Article[]> {
+    // In browser, attempt to fetch live published articles from PostgreSQL
+    if (typeof window !== "undefined") {
+      try {
+        const queryParams = new URLSearchParams();
+        if (params?.filter) queryParams.set("filter", params.filter);
+        if (params?.category) queryParams.set("category", params.category);
+        if (params?.tag) queryParams.set("tag", params.tag);
+        if (params?.search) queryParams.set("q", params.search);
+
+        const res = await fetch(`/api/articles?${queryParams.toString()}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.articles && json.articles.length > 0) {
+            return json.articles as Article[];
+          }
+        }
+      } catch (err) {
+        console.warn("[ArticleRepository] Live fetch fallback to mock data:", err);
+      }
+    }
+
     let result = [...MOCK_ARTICLES];
 
     // Filter by tab filter
