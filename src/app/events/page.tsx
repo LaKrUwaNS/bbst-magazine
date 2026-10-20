@@ -58,5 +58,4 @@ export default function EventsPage() {
       </div>
     </main>
   );
->>>>>>> 2c15fb96888c2c70a4b858279a9d66da723ae378
 }
