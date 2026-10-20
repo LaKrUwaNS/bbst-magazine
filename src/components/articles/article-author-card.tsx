@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Mail, Globe } from "lucide-react";
+import Link from "next/link";
+import { Mail, Globe, ArrowRight } from "lucide-react";
 import { ArticleAuthor } from "@/types/article";
 
 interface ArticleAuthorCardProps {
@@ -16,22 +17,46 @@ export function ArticleAuthorCard({ author }: ArticleAuthorCardProps) {
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gray-50/70 border border-gray-100 my-6">
       <div className="flex items-start gap-4 min-w-0">
         {/* Avatar */}
-        <div className="relative w-13 h-13 rounded-full overflow-hidden bg-gray-200 shrink-0 border border-white shadow-2xs">
-          <Image
-            src={author.avatar}
-            alt={author.name}
-            fill
-            sizes="52px"
-            className="object-cover"
-          />
-        </div>
+        {author.slug ? (
+          <Link
+            href={`/writers/${author.slug}`}
+            className="relative w-13 h-13 rounded-full overflow-hidden bg-gray-200 shrink-0 border border-white shadow-2xs hover:ring-2 hover:ring-[#00C800] transition-all"
+          >
+            <Image
+              src={author.avatar}
+              alt={author.name}
+              fill
+              sizes="52px"
+              className="object-cover"
+            />
+          </Link>
+        ) : (
+          <div className="relative w-13 h-13 rounded-full overflow-hidden bg-gray-200 shrink-0 border border-white shadow-2xs">
+            <Image
+              src={author.avatar}
+              alt={author.name}
+              fill
+              sizes="52px"
+              className="object-cover"
+            />
+          </div>
+        )}
 
         {/* Info */}
         <div className="flex flex-col min-w-0">
           <div className="flex items-baseline gap-2">
-            <h4 className="font-bold text-sm sm:text-base text-[#171717] truncate">
-              {author.name}
-            </h4>
+            {author.slug ? (
+              <Link
+                href={`/writers/${author.slug}`}
+                className="font-bold text-sm sm:text-base text-[#171717] hover:text-[#00A800] transition-colors truncate"
+              >
+                {author.name}
+              </Link>
+            ) : (
+              <h4 className="font-bold text-sm sm:text-base text-[#171717] truncate">
+                {author.name}
+              </h4>
+            )}
           </div>
           <span className="text-xs text-gray-400 mb-1.5">
             {author.department}
@@ -44,18 +69,27 @@ export function ArticleAuthorCard({ author }: ArticleAuthorCardProps) {
 
       {/* Actions */}
       <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-3 shrink-0">
-        {/* Follow demo button */}
-        <button
-          type="button"
-          onClick={() => setIsFollowing((prev) => !prev)}
-          className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-            isFollowing
-              ? "bg-[#00E500] text-[#171717] font-bold"
-              : "bg-white border border-gray-200 text-gray-700 hover:text-black hover:border-gray-300"
-          }`}
-        >
-          {isFollowing ? "Following" : "Follow"}
-        </button>
+        {author.slug ? (
+          <Link
+            href={`/writers/${author.slug}`}
+            className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-semibold bg-white border border-gray-200 text-gray-700 hover:text-black hover:border-emerald-500 hover:bg-emerald-50/50 transition-all cursor-pointer whitespace-nowrap"
+          >
+            <span>View Profile</span>
+            <ArrowRight className="w-3 h-3 text-[#00C800]" />
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setIsFollowing((prev) => !prev)}
+            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+              isFollowing
+                ? "bg-[#00E500] text-[#171717] font-bold"
+                : "bg-white border border-gray-200 text-gray-700 hover:text-black hover:border-gray-300"
+            }`}
+          >
+            {isFollowing ? "Following" : "Follow"}
+          </button>
+        )}
 
         {/* Social Icons */}
         <div className="flex items-center gap-2 text-gray-400">

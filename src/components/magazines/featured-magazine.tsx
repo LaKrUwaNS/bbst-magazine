@@ -144,6 +144,8 @@ export function FeaturedMagazine({
             <a
               href={magazine.pdfAsset}
               download={`${magazine.slug}.pdf`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full text-sm font-bold bg-white hover:bg-gray-50 text-[#171717] border border-gray-300 shadow-2xs hover:border-gray-400 transition-all duration-200 cursor-pointer"
             >
               <Download className="w-4 h-4 text-gray-600" />

@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Add New Magazine | BBST Magazine Admin",
 };
 
+
 export const instant = false;
 
 export default function NewMagazinePage() {

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "tsx scripts/verify-system.ts",
     "seed": "tsx prisma/seed.ts",
     "hash-password": "node scripts/generate-hash.mjs"
   },

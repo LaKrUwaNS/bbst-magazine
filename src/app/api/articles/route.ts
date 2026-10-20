@@ -40,14 +40,22 @@ export async function GET(request: NextRequest) {
       include: {
         category: true,
         author: true,
+        writer: true,
       },
       orderBy,
     });
 
     const articles = dbArticles.map((a) => {
-      const authorName = a.authorName || a.author?.name || "BBST Contributor";
-      const authorEmail = a.author?.email || a.authorEmail || undefined;
-      const authorDept = a.authorDept || "Uva Wellassa University";
+      const authorName = a.writer?.name || a.authorName || a.author?.name || "BBST Contributor";
+      const authorEmail = a.writer?.email || a.author?.email || a.authorEmail || undefined;
+      const authorDept = a.writer?.department || a.authorDept || "Uva Wellassa University";
+      const authorAvatar = a.writer?.profileImageUrl || a.author?.image || "/images/avatar1.jpg";
+      const authorBio =
+        a.writer?.shortBio ||
+        a.writer?.bio ||
+        `${authorName} is an active student researcher and contributor to BBST Magazine.`;
+      const authorSlug = a.writer?.slug || undefined;
+      const authorSocials = (a.writer?.socialLinks as Record<string, string>) || {};
       const tagsList = a.tags ? a.tags.split(",").map((t) => t.trim()).filter(Boolean) : ["Campus", "BBST"];
 
       // Generate structured sections for detail modal reader if content has paragraphs
@@ -69,12 +77,14 @@ export async function GET(request: NextRequest) {
           slug: a.category?.slug || "general",
         },
         author: {
-          id: a.authorId || a.id,
+          id: a.writerId || a.authorId || a.id,
           name: authorName,
+          slug: authorSlug,
           department: authorDept,
-          avatar: a.author?.image || "/images/avatar1.jpg",
-          bio: `${authorName} is an active student researcher and contributor to BBST Magazine.`,
+          avatar: authorAvatar,
+          bio: authorBio,
           email: authorEmail,
+          socials: authorSocials,
         },
         publishedAt: a.publishedAt
           ? new Date(a.publishedAt).toLocaleDateString("en-US", {

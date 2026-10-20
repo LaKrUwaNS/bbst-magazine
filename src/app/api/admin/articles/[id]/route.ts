@@ -14,6 +14,7 @@ const updateArticleSchema = z.object({
   authorName: z.string().trim().optional(),
   authorEmail: z.string().trim().email().optional().nullable().or(z.literal("")),
   authorDept: z.string().trim().optional().nullable(),
+  writerId: z.string().optional().nullable(),
   categoryId: z.string().optional().nullable(),
   coverImage: z.string().optional().nullable(),
   coverImagePublicId: z.string().optional().nullable(),
@@ -50,6 +51,7 @@ export async function GET(
       where: { id },
       include: {
         category: true,
+        writer: { select: { id: true, name: true, slug: true, profileImageUrl: true, department: true } },
         revisions: { orderBy: { createdAt: "desc" } },
       },
     });
@@ -132,9 +134,19 @@ export async function PATCH(
     if (data.authorName !== undefined) updatePayload.authorName = data.authorName;
     if (data.authorEmail !== undefined) updatePayload.authorEmail = data.authorEmail || null;
     if (data.authorDept !== undefined) updatePayload.authorDept = data.authorDept;
+    if (data.writerId !== undefined) updatePayload.writerId = data.writerId || null;
     if (data.categoryId !== undefined) updatePayload.categoryId = data.categoryId;
     if (data.coverImage !== undefined) updatePayload.coverImage = data.coverImage;
-    if (data.coverImagePublicId !== undefined) updatePayload.coverImagePublicId = data.coverImagePublicId;
+    if (data.coverImagePublicId !== undefined) {
+      updatePayload.coverImagePublicId = data.coverImagePublicId;
+      if (
+        existing.coverImagePublicId &&
+        data.coverImagePublicId &&
+        existing.coverImagePublicId !== data.coverImagePublicId
+      ) {
+        await deleteAsset(existing.coverImagePublicId, "image").catch(() => null);
+      }
+    }
     if (data.tags !== undefined) updatePayload.tags = data.tags;
     if (data.isFeatured !== undefined) updatePayload.isFeatured = data.isFeatured;
     if (data.editorialNotes !== undefined) updatePayload.editorialNotes = data.editorialNotes;
@@ -150,7 +162,10 @@ export async function PATCH(
     const updated = await prisma.article.update({
       where: { id },
       data: updatePayload,
-      include: { category: true },
+      include: {
+        category: true,
+        writer: { select: { id: true, name: true, slug: true, profileImageUrl: true } },
+      },
     });
 
     // Record activity
@@ -170,6 +185,7 @@ export async function PATCH(
     if (data.slug && data.slug !== existing.slug) {
       revalidatePath(`/articles/${data.slug}`);
     }
+    revalidatePath("/writers");
     revalidatePath("/admin");
 
     return NextResponse.json({

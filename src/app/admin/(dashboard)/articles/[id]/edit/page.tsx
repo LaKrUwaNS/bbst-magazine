@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Edit Article | BBST Magazine Admin",
 };
 
+
 export const instant = false;
 
 export default async function EditArticlePage({
@@ -37,6 +38,7 @@ export default async function EditArticlePage({
         authorName: article.authorName,
         authorEmail: article.authorEmail,
         authorDept: article.authorDept,
+        writerId: article.writerId,
         categoryId: article.categoryId,
         tags: article.tags,
         status: article.status,

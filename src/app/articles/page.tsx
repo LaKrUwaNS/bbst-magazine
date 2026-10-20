@@ -7,6 +7,7 @@ export const metadata: Metadata = {
     "Explore stories, research, ideas and perspectives from the BBST student community.",
 };
 
+
 export const instant = false;
 
 export default async function ArticlesPage({

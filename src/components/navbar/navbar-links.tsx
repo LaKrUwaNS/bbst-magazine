@@ -10,6 +10,7 @@ export const NAV_LINKS = [
   { label: "Articles", href: "/articles" },
   { label: "Magazine", href: "/magazines" },
   { label: "Categories", href: "/categories" },
+  { label: "Writers", href: "/writers" },
   { label: "Events", href: "/events" },
   { label: "About", href: "/about" },
 ];

@@ -20,10 +20,13 @@ function mergeWithCuratedData(dbIssue: {
   id: string;
   title: string;
   slug: string;
+  edition?: string | null;
   description: string | null;
   coverImage: string | null;
   pdfAsset: string | null;
   publicationDate: Date | null;
+  publicationYear?: number | null;
+  isFeatured?: boolean;
   status: string;
 }): MagazineIssueItem {
   const curated = BBST_MAGAZINES.find(
@@ -34,7 +37,9 @@ function mergeWithCuratedData(dbIssue: {
     ? dbIssue.publicationDate.toISOString()
     : curated?.publicationDate || new Date().toISOString();
 
-  const parsedYear = dbIssue.publicationDate
+  const parsedYear = dbIssue.publicationYear
+    ? dbIssue.publicationYear
+    : dbIssue.publicationDate
     ? new Date(dbIssue.publicationDate).getFullYear()
     : curated?.year || new Date().getFullYear();
 
@@ -42,7 +47,7 @@ function mergeWithCuratedData(dbIssue: {
     id: dbIssue.id,
     title: dbIssue.title || curated?.title || "BBST Student Magazine",
     slug: dbIssue.slug,
-    edition: curated?.edition || `Volume ${parsedYear}`,
+    edition: dbIssue.edition || curated?.edition || `Volume ${parsedYear}`,
     volume: curated?.volume || "Vol. 02",
     issueNumber: curated?.issueNumber || 1,
     year: parsedYear,
@@ -61,14 +66,14 @@ function mergeWithCuratedData(dbIssue: {
     publicationDate: publicationDateStr,
     pageCount: curated?.pageCount || 56,
     fileSize: curated?.fileSize || "12.0 MB",
-    isFeatured: curated?.isFeatured ?? false,
+    isFeatured: dbIssue.isFeatured !== undefined ? Boolean(dbIssue.isFeatured) : (curated?.isFeatured ?? false),
     highlights: curated?.highlights || [
       "Student research & engineering prototypes",
       "Biosystems innovations and field reports",
       "Interviews with faculty and alumni mentors",
     ],
     pages: curated?.pages,
-    status: (dbIssue.status as "published" | "draft" | "archived") || "published",
+    status: (dbIssue.status.toLowerCase() as "published" | "draft" | "archived") || "published",
   };
 }
 
@@ -81,7 +86,7 @@ export class MagazineRepository {
 
     try {
       const dbIssues = await prisma.magazineIssue.findMany({
-        where: { status: "published" },
+        where: { status: { in: ["published", "PUBLISHED"] } },
         orderBy: { publicationDate: "desc" },
       });
 
@@ -153,7 +158,7 @@ export class MagazineRepository {
         where: { slug },
       });
 
-      if (dbIssue && dbIssue.status === "published") {
+      if (dbIssue && (dbIssue.status === "published" || dbIssue.status === "PUBLISHED")) {
         return mergeWithCuratedData(dbIssue);
       }
     } catch (error) {

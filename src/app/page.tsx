@@ -6,19 +6,13 @@ import { HeroSection } from "@/components/hero-section";
 import { MagazineIntro } from "@/components/intro/magazine-intro";
 import { EditorialScrollExperience } from "@/components/editorial-scroll-experience";
 import { SubmitArticleDialog } from "@/components/submit-article-dialog";
-import {
-  ArrowRight,
-  BookOpen,
-  FileText,
-  Calendar,
-  UserCheck,
-} from "lucide-react";
-
-export const instant = false;
+import { ArrowRight, BookOpen, FileText, Calendar } from "lucide-react";
 
 type HomeArticle = Prisma.ArticleGetPayload<{
-  include: { category: true; author: true };
+  include: { category: true; author: true; writer: true };
 }>;
+
+export const instant = false;
 
 export default async function Home() {
   let recentArticles: HomeArticle[] = [];
@@ -36,17 +30,21 @@ export default async function Home() {
       usersCount,
     ] = await Promise.all([
       prisma.article.findMany({
-        where: { status: "published" },
+        where: { status: { in: ["PUBLISHED", "published"] } },
         orderBy: { createdAt: "desc" },
         take: 6,
-        include: { category: true, author: true },
+        include: { category: true, author: true, writer: true },
       }),
       prisma.magazineIssue.findFirst({
-        where: { status: "published" },
+        where: { status: { in: ["PUBLISHED", "published"] } },
         orderBy: { publicationDate: "desc" },
       }),
-      prisma.article.count({ where: { status: "published" } }),
-      prisma.magazineIssue.count({ where: { status: "published" } }),
+      prisma.article.count({
+        where: { status: { in: ["PUBLISHED", "published"] } },
+      }),
+      prisma.magazineIssue.count({
+        where: { status: { in: ["PUBLISHED", "published"] } },
+      }),
       prisma.user.count(),
     ]);
   } catch (error) {
@@ -60,8 +58,7 @@ export default async function Home() {
   // Use real counts if available, otherwise display reference platform baseline metrics
   const displayArticlesCount =
     publishedArticlesCount > 0 ? `${publishedArticlesCount}+` : "250+";
-  const displayContributorsCount =
-    usersCount > 0 ? `${usersCount}+` : "500+";
+  const displayContributorsCount = usersCount > 0 ? `${usersCount}+` : "500+";
   const displayMagazinesCount =
     publishedMagazinesCount > 0 ? `${publishedMagazinesCount}+` : "20+";
 
@@ -112,43 +109,98 @@ export default async function Home() {
 
         {recentArticles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recentArticles.map((article) => (
-              <article
-                key={article.id}
-                className="group flex flex-col justify-between p-6 rounded-2xl border border-gray-200/80 bg-white hover:border-[#00E500]/60 hover:shadow-lg transition-all duration-300"
-              >
-                <div className="space-y-3">
-                  {article.category && (
-                    <span className="inline-block px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                      {article.category.name}
-                    </span>
-                  )}
-                  <h3 className="text-xl font-bold text-[#171717] group-hover:text-emerald-800 transition-colors">
-                    <Link href={`/articles/${article.slug}`}>
-                      {article.title}
-                    </Link>
-                  </h3>
-                  {article.excerpt && (
-                    <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
-                      {article.excerpt}
-                    </p>
-                  )}
-                </div>
+            {recentArticles.map((article) => {
+              const authorName =
+                article.writer?.name ||
+                article.authorName ||
+                article.author?.name ||
+                "BBST Contributor";
+              const authorAvatar =
+                article.writer?.profileImageUrl ||
+                article.author?.image ||
+                "/images/avatar1.jpg";
+              const coverImg = article.coverImage || "/images/Magazine.png";
 
-                <div className="pt-6 mt-6 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                  <div className="flex items-center gap-1.5">
-                    <UserCheck className="w-3.5 h-3.5 text-gray-400" />
-                    <span>{article.author?.name || article.authorName || "BBST Contributor"}</span>
+              return (
+                <article
+                  key={article.id}
+                  className="group flex flex-col justify-between rounded-2xl border border-gray-200/80 bg-white hover:border-[#00E500]/60 hover:shadow-lg transition-all duration-300 overflow-hidden"
+                >
+                  {/* Article Cover Image Container */}
+                  <div className="relative w-full h-48 overflow-hidden bg-gray-50">
+                    <Image
+                      src={coverImg}
+                      alt={article.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                    />
+                    {article.category && (
+                      <div className="absolute top-3 left-3 z-10">
+                        <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#00E500] text-black shadow-xs">
+                          {article.category.name}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-gray-400" />
-                    <span>
-                      {new Date(article.createdAt).toLocaleDateString()}
-                    </span>
+
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-bold text-[#171717] group-hover:text-emerald-800 transition-colors line-clamp-2 leading-snug">
+                        <Link href={`/articles/${article.slug}`}>
+                          {article.title}
+                        </Link>
+                      </h3>
+                      {article.excerpt && (
+                        <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                          {article.excerpt}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                      <div className="flex items-center gap-2 min-w-0 pr-2">
+                        <div className="relative w-6 h-6 rounded-full overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                          <Image
+                            src={authorAvatar}
+                            alt={authorName}
+                            fill
+                            sizes="24px"
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="truncate">
+                          {article.writer ? (
+                            <Link
+                              href={`/writers/${article.writer.slug}`}
+                              className="font-semibold text-gray-900 hover:text-emerald-700 transition-colors truncate"
+                            >
+                              {authorName}
+                            </Link>
+                          ) : (
+                            <span className="font-semibold text-gray-900 truncate">
+                              {authorName}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0 text-gray-400">
+                        <Calendar className="w-3 h-3 text-gray-400" />
+                        <span>
+                          {new Date(
+                            article.publishedAt || article.createdAt,
+                          ).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         ) : (
           /* Graceful empty state when database has no published articles yet */

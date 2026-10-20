@@ -22,9 +22,12 @@ import { Navbar } from "@/components/navbar";
 import { PublicFooter } from "@/components/public-footer";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://bbstmagazine.example.com"),
   title: "BBST Magazine | Student Voices for a Brighter Tomorrow",
   description: "Official university student publication dedicated to innovation, research, arts, and campus voices.",
 };
+
+export const instant = false;
 
 export default function RootLayout({
   children,

@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Submit your article, research paper, or essay to the BBST Student Magazine editorial board for review and publication.",
 };
 
+
 export const instant = false;
 
 export default function SubmitArticlePage() {

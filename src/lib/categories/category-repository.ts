@@ -26,7 +26,7 @@ export class CategoryRepository {
           _count: {
             select: {
               articles: {
-                where: { status: "published" },
+                where: { status: { in: ["PUBLISHED", "published"] } },
               },
             },
           },
@@ -47,9 +47,9 @@ export class CategoryRepository {
             id: c.id,
             name: c.name,
             slug: c.slug,
-            description: meta.description,
-            iconName: meta.iconName,
-            image: meta.image,
+            description: c.description || meta.description,
+            iconName: c.iconName || meta.iconName,
+            image: c.coverImage || meta.image,
             articleCount: c._count.articles,
             isFeatured: meta.isFeatured,
           };

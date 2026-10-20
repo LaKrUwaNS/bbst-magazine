@@ -140,12 +140,40 @@ model Article {
   authorId           String?
   author             User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
+  writerId           String?
+  writer             WriterProfile? @relation(fields: [writerId], references: [id], onDelete: SetNull)
+
   categoryId         String?
   category           Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   revisions          ArticleRevision[]
 
   @@map("article")
+}
+
+model WriterProfile {
+  id                   String    @id @default(uuid())
+  name                 String
+  slug                 String    @unique
+  bio                  String?
+  shortBio             String?
+  profileImageUrl      String?
+  profileImagePublicId String?
+  department           String?
+  academicYear         String?
+  role                 String?
+  expertise            String?
+  email                String?
+  website              String?
+  socialLinks          Json?
+  status               String    @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
+  isFeatured           Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  articles             Article[]
+
+  @@map("writer_profile")
 }
 
 model ArticleRevision {

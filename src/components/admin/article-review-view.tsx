@@ -25,6 +25,8 @@ export interface ArticleReviewData {
   authorName: string | null;
   authorEmail: string | null;
   authorDept: string | null;
+  writerId?: string | null;
+  writer?: { id: string; name: string; slug: string; profileImageUrl?: string | null } | null;
   submissionRef: string | null;
   submissionSource: string | null;
   editorialFeedback: string | null;
@@ -262,7 +264,17 @@ export function ArticleReviewView({ initialArticle }: ArticleReviewViewProps) {
             <div>
               <span className="text-gray-400 block font-medium">Original Writer</span>
               <span className="font-bold text-gray-900">{article.authorName || "Anonymous"}</span>
-              <span className="text-gray-500 block truncate">{article.authorEmail || "No email"}</span>
+              {article.writer ? (
+                <Link
+                  href={`/writers/${article.writer.slug}`}
+                  target="_blank"
+                  className="text-emerald-700 hover:underline font-semibold block truncate"
+                >
+                  Linked Profile ({article.writer.name})
+                </Link>
+              ) : (
+                <span className="text-gray-500 block truncate">{article.authorEmail || "Unlinked Contributor"}</span>
+              )}
             </div>
             <div>
               <span className="text-gray-400 block font-medium">Category</span>

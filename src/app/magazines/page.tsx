@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Browse, read online, and download publications from the Faculty of Technological Studies at Uva Wellassa University.",
 };
 
+
 export const instant = false;
 
 export default async function MagazinesPage() {

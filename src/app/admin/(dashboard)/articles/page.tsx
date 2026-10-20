@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "All Articles | BBST Magazine Admin",
 };
 
+
 export const instant = false;
 
 export default function AdminArticlesPage() {

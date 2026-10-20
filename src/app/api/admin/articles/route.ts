@@ -14,10 +14,11 @@ const createEditorArticleSchema = z.object({
   authorName: z.string().trim().min(2, "Author name is required"),
   authorEmail: z.string().trim().email("Valid email required").optional().or(z.literal("")),
   authorDept: z.string().trim().optional(),
+  writerId: z.string().optional().nullable(),
   categoryId: z.string().optional(),
   coverImage: z.string().optional(),
   coverImagePublicId: z.string().optional(),
-  tags: z.string().optional(),
+  tags: z.union([z.string(), z.array(z.string()).transform((arr) => arr.join(", "))]).optional(),
   status: z
     .enum([
       "DRAFT",
@@ -81,6 +82,7 @@ export async function GET(request: NextRequest) {
         include: {
           category: { select: { id: true, name: true, slug: true } },
           author: { select: { name: true, email: true } },
+          writer: { select: { id: true, name: true, slug: true, profileImageUrl: true } },
         },
         orderBy: { updatedAt: "desc" },
         skip: (page - 1) * pageSize,
@@ -135,6 +137,7 @@ export async function POST(request: NextRequest) {
         authorName: data.authorName,
         authorEmail: data.authorEmail || undefined,
         authorDept: data.authorDept,
+        writerId: data.writerId,
         categoryId: data.categoryId,
         coverImage: data.coverImage,
         coverImagePublicId: data.coverImagePublicId,
@@ -149,6 +152,7 @@ export async function POST(request: NextRequest) {
 
     revalidatePath("/articles");
     revalidatePath(`/articles/${article.slug}`);
+    revalidatePath("/writers");
     revalidatePath("/admin");
 
     return NextResponse.json({

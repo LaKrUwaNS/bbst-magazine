@@ -28,10 +28,15 @@ export default async function EditMagazinePage({
     id: magazine.id,
     title: magazine.title,
     slug: magazine.slug,
+    edition: magazine.edition,
     description: magazine.description,
     coverImage: magazine.coverImage,
+    coverImagePublicId: magazine.coverImagePublicId,
     pdfAsset: magazine.pdfAsset,
+    pdfAssetPublicId: magazine.pdfAssetPublicId,
     publicationDate: magazine.publicationDate,
+    publicationYear: magazine.publicationYear,
+    isFeatured: magazine.isFeatured,
     status: (magazine.status as "draft" | "published" | "archived") || "draft",
   };
 

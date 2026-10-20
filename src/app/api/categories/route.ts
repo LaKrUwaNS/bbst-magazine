@@ -1,0 +1,57 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { CATEGORY_METADATA } from "@/data/categories.data";
+
+// GET /api/categories - Public categories listing with accurate article counts
+export async function GET() {
+  try {
+    const dbCategories = await prisma.category.findMany({
+      orderBy: { name: "asc" },
+      include: {
+        _count: {
+          select: {
+            articles: {
+              where: {
+                status: { in: ["PUBLISHED", "published"] },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const categories = dbCategories.map((c) => {
+      const meta = CATEGORY_METADATA[c.slug] || {
+        description: "Explore articles, research papers, and student perspectives in this field.",
+        iconName: "Folder",
+        image: "/images/articles-campus-hero.png",
+        isFeatured: false,
+      };
+
+      return {
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        description: c.description || meta.description,
+        iconName: c.iconName || meta.iconName,
+        coverImage: c.coverImage || meta.image,
+        image: c.coverImage || meta.image,
+        articleCount: c._count.articles,
+        count: c._count.articles,
+        isFeatured: meta.isFeatured,
+      };
+    });
+
+    return NextResponse.json({
+      success: true,
+      categories,
+      total: categories.length,
+    });
+  } catch (error) {
+    console.error("[Public Categories API] Error:", error);
+    return NextResponse.json(
+      { error: "Failed to load categories." },
+      { status: 500 }
+    );
+  }
+}

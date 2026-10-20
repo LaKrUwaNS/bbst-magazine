@@ -78,6 +78,45 @@ async function main() {
       where: { slug: art.category.slug },
     });
 
+    // Upsert WriterProfile
+    const writerSlug = art.author.name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
+
+    const writerProfile = await prisma.writerProfile.upsert({
+      where: { slug: writerSlug },
+      update: {
+        name: art.author.name,
+        profileImageUrl: art.author.avatar,
+        department: art.author.department,
+        shortBio: art.author.bio,
+        bio: `${art.author.bio}\n\nActively contributes research, insights, and perspectives to the BBST Student Magazine community at Uva Wellassa University.`,
+        email: authorEmail,
+        socialLinks: art.author.socials || {},
+        status: "PUBLISHED",
+        role: "Student Contributor",
+        expertise: art.tags ? art.tags.slice(0, 3).join(", ") : "Science & Technology",
+      },
+      create: {
+        id: `writer-${art.author.id}`,
+        name: art.author.name,
+        slug: writerSlug,
+        profileImageUrl: art.author.avatar,
+        department: art.author.department,
+        shortBio: art.author.bio,
+        bio: `${art.author.bio}\n\nActively contributes research, insights, and perspectives to the BBST Student Magazine community at Uva Wellassa University.`,
+        email: authorEmail,
+        socialLinks: art.author.socials || {},
+        status: "PUBLISHED",
+        role: "Student Contributor",
+        expertise: art.tags ? art.tags.slice(0, 3).join(", ") : "Science & Technology",
+        isFeatured: Boolean(art.isEditorPick || art.isTrending),
+      },
+    });
+
     // Upsert Article
     await prisma.article.upsert({
       where: { slug: art.slug },
@@ -87,8 +126,13 @@ async function main() {
         content: contentHtml,
         coverImage: art.coverImage,
         status: art.status,
+        authorName: art.author.name,
+        authorDept: art.author.department,
+        authorEmail: authorEmail,
         authorId: art.author.id,
+        writerId: writerProfile.id,
         categoryId: dbCategory?.id || null,
+        tags: art.tags ? art.tags.join(", ") : null,
       },
       create: {
         id: art.id,
@@ -98,8 +142,14 @@ async function main() {
         content: contentHtml,
         coverImage: art.coverImage,
         status: art.status,
+        authorName: art.author.name,
+        authorDept: art.author.department,
+        authorEmail: authorEmail,
         authorId: art.author.id,
+        writerId: writerProfile.id,
         categoryId: dbCategory?.id || null,
+        tags: art.tags ? art.tags.join(", ") : null,
+        publishedAt: new Date(art.publishedAt),
         createdAt: new Date(art.publishedAt),
       },
     });

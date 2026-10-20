@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Review Article Submission | BBST Magazine Admin",
 };
 
+
 export const instant = false;
 
 export default async function SubmissionReviewPage({
@@ -20,6 +21,7 @@ export default async function SubmissionReviewPage({
     where: { id },
     include: {
       category: { select: { id: true, name: true, slug: true } },
+      writer: { select: { id: true, name: true, slug: true, profileImageUrl: true } },
       revisions: { orderBy: { createdAt: "desc" } },
     },
   });
@@ -41,6 +43,8 @@ export default async function SubmissionReviewPage({
         authorName: article.authorName,
         authorEmail: article.authorEmail,
         authorDept: article.authorDept,
+        writerId: article.writerId,
+        writer: article.writer,
         submissionRef: article.submissionRef,
         submissionSource: article.submissionSource,
         editorialFeedback: article.editorialFeedback,

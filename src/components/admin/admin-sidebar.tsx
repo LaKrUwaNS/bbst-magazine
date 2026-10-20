@@ -10,6 +10,7 @@ import {
   PenSquare,
   BookOpen,
   Layers,
+  Users,
   ExternalLink,
   LogOut,
   Menu,
@@ -45,6 +46,12 @@ const NAV_ITEMS = [
     href: "/admin/articles/new",
     icon: PenSquare,
     exact: true,
+  },
+  {
+    label: "Writer Profiles",
+    href: "/admin/writers",
+    icon: Users,
+    exact: false,
   },
   {
     label: "Magazine Editions",

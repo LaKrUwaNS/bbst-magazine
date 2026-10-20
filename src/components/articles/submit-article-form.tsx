@@ -87,7 +87,7 @@ export function SubmitArticleForm() {
   useEffect(() => {
     async function loadCategories() {
       try {
-        const res = await fetch("/api/admin/categories");
+        const res = await fetch("/api/categories");
         const json = await res.json();
         if (json.categories && json.categories.length > 0) {
           setCategories(json.categories);

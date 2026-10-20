@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Manage Magazines | BBST Magazine Admin",
 };
 
+
 export const instant = false;
 
 export default async function AdminMagazinesPage() {

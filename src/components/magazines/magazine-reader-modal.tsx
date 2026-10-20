@@ -246,6 +246,8 @@ export function MagazineReaderModal({
               <a
                 href={magazine.pdfAsset}
                 download={`${magazine.slug}.pdf`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white text-black hover:bg-gray-200 transition-colors cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />

@@ -31,6 +31,7 @@ export interface EditorCreateArticleInput {
   authorName: string;
   authorEmail?: string;
   authorDept?: string;
+  writerId?: string | null;
   categoryId?: string;
   coverImage?: string;
   coverImagePublicId?: string;
@@ -172,6 +173,7 @@ export async function createEditorArticle(
       authorName: input.authorName.trim(),
       authorEmail: input.authorEmail?.trim().toLowerCase() || null,
       authorDept: input.authorDept?.trim() || null,
+      writerId: input.writerId || null,
       categoryId: input.categoryId || null,
       tags: input.tags || null,
       isFeatured: Boolean(input.isFeatured),
@@ -184,6 +186,7 @@ export async function createEditorArticle(
     },
     include: {
       category: true,
+      writer: true,
     },
   });
 

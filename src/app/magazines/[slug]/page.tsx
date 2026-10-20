@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { magazineRepository } from "@/lib/magazines/magazine-repository";
 import { MagazineDetailView } from "@/components/magazines/magazine-detail-view";
 
-export const instant = false;
 
 interface MagazineDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -26,6 +25,8 @@ export async function generateMetadata({
     description: magazine.description,
   };
 }
+
+export const instant = false;
 
 export default async function MagazineDetailPage({
   params,

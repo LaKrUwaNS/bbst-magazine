@@ -32,10 +32,11 @@ export default async function AboutPage() {
   let teamMembers: TeamMember[] | undefined = undefined;
 
   try {
-    const [articles, magazines, users, categories, editorUsers] =
+    const [articles, magazines, writers, users, categories, editorUsers] =
       await Promise.all([
-        prisma.article.count({ where: { status: "published" } }),
-        prisma.magazineIssue.count({ where: { status: "published" } }),
+        prisma.article.count({ where: { status: { in: ["PUBLISHED", "published"] } } }),
+        prisma.magazineIssue.count({ where: { status: { in: ["published", "PUBLISHED"] } } }),
+        prisma.writerProfile.count({ where: { status: { in: ["PUBLISHED", "published"] } } }),
         prisma.user.count(),
         prisma.category.count(),
         prisma.user.findMany({
@@ -55,7 +56,7 @@ export default async function AboutPage() {
 
     articlesCount = articles;
     magazinesCount = magazines;
-    contributorsCount = users;
+    contributorsCount = Math.max(writers, users, 1);
     categoriesCount = categories;
 
     // If editor users exist in DB with valid details, map them

@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "Discover ideas, stories, research, and creative work from the BBST student community across science, technology, agriculture, and campus life.",
 };
 
+
 export const instant = false;
 
 export default async function CategoriesPage() {

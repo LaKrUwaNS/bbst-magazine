@@ -29,6 +29,7 @@ export interface ArticleFormInitialData {
   authorName?: string | null;
   authorEmail?: string | null;
   authorDept?: string | null;
+  writerId?: string | null;
   categoryId?: string | null;
   tags?: string | null;
   status?: string;
@@ -52,6 +53,7 @@ export function ArticleEditorForm({ initialData }: ArticleEditorFormProps) {
   const [authorName, setAuthorName] = useState(initialData?.authorName || "");
   const [authorEmail, setAuthorEmail] = useState(initialData?.authorEmail || "");
   const [authorDept, setAuthorDept] = useState(initialData?.authorDept || "");
+  const [writerId, setWriterId] = useState(initialData?.writerId || "");
   const [categoryId, setCategoryId] = useState(initialData?.categoryId || "");
   const [tags, setTags] = useState(initialData?.tags || "");
   const [status, setStatus] = useState<string>(initialData?.status || "DRAFT");
@@ -61,8 +63,17 @@ export function ArticleEditorForm({ initialData }: ArticleEditorFormProps) {
   );
   const [editorialNotes, setEditorialNotes] = useState(initialData?.editorialNotes || "");
 
-  // Categories
+  // Categories & Writers
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
+  const [writersList, setWritersList] = useState<
+    Array<{
+      id: string;
+      name: string;
+      department?: string | null;
+      profileImageUrl?: string | null;
+      email?: string | null;
+    }>
+  >([]);
 
   // Cover image upload
   const [coverImage, setCoverImage] = useState(initialData?.coverImage || "");
@@ -82,21 +93,28 @@ export function ArticleEditorForm({ initialData }: ArticleEditorFormProps) {
   const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
-    async function loadCategories() {
+    async function loadData() {
       try {
-        const res = await fetch("/api/admin/categories");
-        const json = await res.json();
-        if (json.categories && json.categories.length > 0) {
-          setCategories(json.categories);
+        const [catRes, writersRes] = await Promise.all([
+          fetch("/api/admin/categories"),
+          fetch("/api/admin/writers?pageSize=100"),
+        ]);
+        const catJson = await catRes.json();
+        if (catJson.categories && catJson.categories.length > 0) {
+          setCategories(catJson.categories);
           if (!categoryId && !isEditing) {
-            setCategoryId(json.categories[0].id);
+            setCategoryId(catJson.categories[0].id);
           }
         }
+        const writersJson = await writersRes.json();
+        if (writersJson.writers) {
+          setWritersList(writersJson.writers);
+        }
       } catch (err) {
-        console.error("Failed to load categories:", err);
+        console.error("Failed to load form dependencies:", err);
       }
     }
-    loadCategories();
+    loadData();
   }, [categoryId, isEditing]);
 
   // Auto-generate slug when title changes (if not editing)
@@ -191,6 +209,7 @@ export function ArticleEditorForm({ initialData }: ArticleEditorFormProps) {
         authorName: authorName.trim(),
         authorEmail: authorEmail.trim() || null,
         authorDept: authorDept.trim() || null,
+        writerId: writerId || null,
         categoryId: categoryId || null,
         coverImage: coverImage || null,
         coverImagePublicId: coverImagePublicId || null,
@@ -370,16 +389,68 @@ export function ArticleEditorForm({ initialData }: ArticleEditorFormProps) {
 
         {/* Section 2: Contributor Attribution */}
         <div className="p-5 rounded-2xl bg-gray-50 border border-gray-200 space-y-4">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-emerald-600" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-700">
-              Original Writer & Attribution Information
-            </h3>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-emerald-600" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-700">
+                Original Writer & Attribution Information
+              </h3>
+            </div>
+            <Link
+              href="/admin/writers/new"
+              target="_blank"
+              className="text-[11px] font-bold text-emerald-800 hover:text-emerald-900 bg-white px-2.5 py-1 rounded-lg border border-emerald-200 hover:border-emerald-300 transition-colors"
+            >
+              + Add New Writer Profile
+            </Link>
           </div>
           <p className="text-xs text-gray-500">
-            Ensure accurate attribution. If creating on behalf of a student who emailed a manuscript,
-            enter their details here.
+            Associate this article with a registered writer profile to link public attribution,
+            or enter manual attribution details below.
           </p>
+
+          {/* Writer Profile Selector */}
+          <div className="space-y-1.5 p-3.5 rounded-xl bg-white border border-gray-200">
+            <label className="text-xs font-bold text-gray-800 flex items-center justify-between">
+              <span>Link Registered Writer Profile (Recommended)</span>
+              {writerId && (
+                <button
+                  type="button"
+                  onClick={() => setWriterId("")}
+                  className="text-[11px] font-semibold text-red-600 hover:underline cursor-pointer"
+                >
+                  Unlink Profile
+                </button>
+              )}
+            </label>
+            <select
+              value={writerId}
+              onChange={(e) => {
+                const selectedId = e.target.value;
+                setWriterId(selectedId);
+                const matched = writersList.find((w) => w.id === selectedId);
+                if (matched) {
+                  if (matched.name) setAuthorName(matched.name);
+                  if (matched.department && !authorDept) setAuthorDept(matched.department);
+                  if (matched.email && !authorEmail) setAuthorEmail(matched.email);
+                }
+              }}
+              className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#00E500] cursor-pointer"
+            >
+              <option value="">— No Writer Profile Linked (Plain Text Attribution) —</option>
+              {writersList.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name} {w.department ? `(${w.department})` : ""}
+                </option>
+              ))}
+            </select>
+            {writerId && (
+              <div className="flex items-center gap-2 pt-1 text-[11px] text-emerald-800 font-semibold">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Article is linked to public writer profile. Visitors can view their author card.</span>
+              </div>
+            )}
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="space-y-1">

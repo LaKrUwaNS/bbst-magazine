@@ -19,10 +19,15 @@ interface InitialMagazineData {
   id?: string;
   title: string;
   slug: string;
+  edition?: string | null;
   description?: string | null;
   coverImage?: string | null;
+  coverImagePublicId?: string | null;
   pdfAsset?: string | null;
+  pdfAssetPublicId?: string | null;
   publicationDate?: string | Date | null;
+  publicationYear?: number | null;
+  isFeatured?: boolean;
   status: "draft" | "published" | "archived";
 }
 
@@ -38,6 +43,11 @@ export function MagazineForm({ initialData, isEditing = false }: MagazineFormPro
   const [title, setTitle] = useState(initialData?.title || "");
   const [slug, setSlug] = useState(initialData?.slug || "");
   const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(Boolean(initialData?.slug));
+  const [edition, setEdition] = useState(initialData?.edition || "");
+  const [publicationYear, setPublicationYear] = useState<number | "">(
+    initialData?.publicationYear ?? new Date().getFullYear()
+  );
+  const [isFeatured, setIsFeatured] = useState(Boolean(initialData?.isFeatured));
   const [description, setDescription] = useState(initialData?.description || "");
   const [publicationDate, setPublicationDate] = useState<string>(() => {
     if (initialData?.publicationDate) {
@@ -54,9 +64,15 @@ export function MagazineForm({ initialData, isEditing = false }: MagazineFormPro
   const currentCoverUrl = initialData?.coverImage || null;
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
+  const [coverImagePublicId, setCoverImagePublicId] = useState<string | null>(
+    initialData?.coverImagePublicId || null
+  );
 
   const currentPdfUrl = initialData?.pdfAsset || null;
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pdfAssetPublicId, setPdfAssetPublicId] = useState<string | null>(
+    initialData?.pdfAssetPublicId || null
+  );
 
   // UI state
   const [uploadingPdf, setUploadingPdf] = useState(false);
@@ -116,8 +132,11 @@ export function MagazineForm({ initialData, isEditing = false }: MagazineFormPro
     setErrorMessage(null);
   };
 
-  // Upload helper for single asset
-  const uploadAssetFile = async (file: File, type: "pdf" | "image"): Promise<string> => {
+  // Upload helper for single asset returning URL and public ID
+  const uploadAssetFile = async (
+    file: File,
+    type: "pdf" | "image"
+  ): Promise<{ url: string; publicId: string | null }> => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("type", type);
@@ -132,7 +151,10 @@ export function MagazineForm({ initialData, isEditing = false }: MagazineFormPro
       throw new Error(data.error || `Failed to upload ${type}.`);
     }
 
-    return data.url;
+    return {
+      url: data.url,
+      publicId: data.publicId || null,
+    };
   };
 
   // Form submission
@@ -161,19 +183,27 @@ export function MagazineForm({ initialData, isEditing = false }: MagazineFormPro
 
     try {
       let finalPdfUrl = currentPdfUrl;
+      let finalPdfPublicId = pdfAssetPublicId;
       let finalCoverUrl = currentCoverUrl;
+      let finalCoverPublicId = coverImagePublicId;
 
       // 1. Upload PDF if a new one was selected
       if (pdfFile) {
         setUploadingPdf(true);
-        finalPdfUrl = await uploadAssetFile(pdfFile, "pdf");
+        const uploadedPdf = await uploadAssetFile(pdfFile, "pdf");
+        finalPdfUrl = uploadedPdf.url;
+        finalPdfPublicId = uploadedPdf.publicId;
+        setPdfAssetPublicId(uploadedPdf.publicId);
         setUploadingPdf(false);
       }
 
       // 2. Upload Cover Image if a new one was selected
       if (coverFile) {
         setUploadingCover(true);
-        finalCoverUrl = await uploadAssetFile(coverFile, "image");
+        const uploadedCover = await uploadAssetFile(coverFile, "image");
+        finalCoverUrl = uploadedCover.url;
+        finalCoverPublicId = uploadedCover.publicId;
+        setCoverImagePublicId(uploadedCover.publicId);
         setUploadingCover(false);
       }
 
@@ -186,10 +216,15 @@ export function MagazineForm({ initialData, isEditing = false }: MagazineFormPro
       const payload = {
         title: title.trim(),
         slug: slug.trim(),
+        edition: edition.trim() || null,
         description: description.trim() || null,
         coverImage: finalCoverUrl || "/images/Magazine.png",
+        coverImagePublicId: finalCoverPublicId || null,
         pdfAsset: finalPdfUrl,
+        pdfAssetPublicId: finalPdfPublicId || null,
         publicationDate: publicationDate ? new Date(publicationDate).toISOString() : null,
+        publicationYear: publicationYear ? Number(publicationYear) : new Date().getFullYear(),
+        isFeatured,
         status,
       };
 
@@ -278,7 +313,7 @@ export function MagazineForm({ initialData, isEditing = false }: MagazineFormPro
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Title */}
-            <div className="space-y-1.5 md:col-span-2">
+            <div className="space-y-1.5">
               <label htmlFor="title" className="block text-xs font-bold text-gray-700">
                 Magazine Title <span className="text-red-500">*</span>
               </label>
@@ -290,6 +325,21 @@ export function MagazineForm({ initialData, isEditing = false }: MagazineFormPro
                 onChange={(e) => handleTitleChange(e.target.value)}
                 placeholder="e.g. BBST Student Magazine — Vol 03 / 2026"
                 className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50/60 focus:bg-white focus:border-[#00C800] focus:ring-2 focus:ring-[#00FF00]/20 outline-none transition-all placeholder:text-gray-400"
+              />
+            </div>
+
+            {/* Edition */}
+            <div className="space-y-1.5">
+              <label htmlFor="edition" className="block text-xs font-bold text-gray-700">
+                Edition / Volume Number
+              </label>
+              <input
+                id="edition"
+                type="text"
+                value={edition}
+                onChange={(e) => setEdition(e.target.value)}
+                placeholder="e.g. Vol 03 / Issue 01"
+                className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50/60 focus:bg-white focus:border-[#00C800] focus:ring-2 focus:ring-[#00FF00]/20 outline-none transition-all placeholder:text-gray-400 text-gray-900"
               />
             </div>
 
@@ -320,17 +370,39 @@ export function MagazineForm({ initialData, isEditing = false }: MagazineFormPro
               </p>
             </div>
 
-            {/* Publication Date */}
-            <div className="space-y-1.5">
-              <label htmlFor="publicationDate" className="block text-xs font-bold text-gray-700">
-                Publication Date
-              </label>
-              <div className="relative">
+            {/* Publication Date & Year */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label htmlFor="publicationDate" className="block text-xs font-bold text-gray-700">
+                  Publication Date
+                </label>
                 <input
                   id="publicationDate"
                   type="date"
                   value={publicationDate}
-                  onChange={(e) => setPublicationDate(e.target.value)}
+                  onChange={(e) => {
+                    setPublicationDate(e.target.value);
+                    if (e.target.value) {
+                      const yr = new Date(e.target.value).getFullYear();
+                      if (!isNaN(yr)) setPublicationYear(yr);
+                    }
+                  }}
+                  className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50/60 focus:bg-white focus:border-[#00C800] focus:ring-2 focus:ring-[#00FF00]/20 outline-none transition-all text-gray-900"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="publicationYear" className="block text-xs font-bold text-gray-700">
+                  Year
+                </label>
+                <input
+                  id="publicationYear"
+                  type="number"
+                  min="2000"
+                  max="2100"
+                  value={publicationYear}
+                  onChange={(e) => setPublicationYear(e.target.value ? parseInt(e.target.value, 10) : "")}
+                  placeholder="2026"
                   className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50/60 focus:bg-white focus:border-[#00C800] focus:ring-2 focus:ring-[#00FF00]/20 outline-none transition-all text-gray-900"
                 />
               </div>
@@ -521,6 +593,26 @@ export function MagazineForm({ initialData, isEditing = false }: MagazineFormPro
                 </span>
                 <span className="block text-xs text-gray-500 leading-normal mt-0.5">
                   Saved securely in the CMS but completely hidden from public visitors.
+                </span>
+              </div>
+            </label>
+          </div>
+
+          {/* Featured Publication Checkbox */}
+          <div className="pt-2 border-t border-gray-100">
+            <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-gray-50/80 hover:bg-emerald-50/30 border border-gray-200 transition-colors cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isFeatured}
+                onChange={(e) => setIsFeatured(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded text-[#00E500] focus:ring-[#00E500]"
+              />
+              <div>
+                <span className="block text-xs font-bold text-gray-900">
+                  Feature this edition
+                </span>
+                <span className="block text-[11px] text-gray-500 mt-0.5">
+                  Prominently showcase this issue in the hero section and featured banner of the magazine archive.
                 </span>
               </div>
             </label>
