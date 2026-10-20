@@ -5,6 +5,7 @@ import type { Prisma } from "@prisma/client";
 import { notFound } from "next/navigation";
 import { ArticleAuthorCard } from "@/components/articles/article-author-card";
 import { ArrowLeft, Calendar, Tag } from "lucide-react";
+import { MOCK_ARTICLES } from "@/data/articles.mock";
 
 
 type ArticleDetail = Prisma.ArticleGetPayload<{
@@ -27,7 +28,90 @@ export default async function ArticleDetailPage({
       include: { author: true, category: true, writer: true },
     });
   } catch (error) {
-    console.error("[ArticleDetailPage] Error loading article:", error);
+    console.error("[ArticleDetailPage] Error loading article from database, attempting fallback:", error);
+  }
+
+  if (!article) {
+    const mock = MOCK_ARTICLES.find((m) => m.slug === slug);
+    if (mock) {
+      const contentHtml = mock.sections
+        .map((s) => `<h3>${s.heading}</h3>${s.content.map((p) => `<p>${p}</p>`).join("")}`)
+        .join("");
+
+      article = {
+        id: mock.id,
+        title: mock.title,
+        slug: mock.slug,
+        excerpt: mock.excerpt,
+        content: contentHtml,
+        coverImage: mock.coverImage,
+        coverImagePublicId: null,
+        status: "published",
+        tags: mock.tags ? mock.tags.join(", ") : null,
+        isFeatured: Boolean(mock.isEditorPick || mock.isTrending),
+        authorName: mock.author.name,
+        authorEmail: null,
+        authorDept: mock.author.department,
+        enteredByEditor: false,
+        submissionSource: "Editorial",
+        submissionRef: null,
+        editorialFeedback: null,
+        rejectionReason: null,
+        editorialNotes: null,
+        reviewedBy: null,
+        submittedAt: null,
+        reviewedAt: null,
+        publishedAt: new Date(mock.publishedAt),
+        createdAt: new Date(mock.publishedAt),
+        updatedAt: new Date(),
+        authorId: mock.author.id,
+        writerId: `writer-${mock.author.id}`,
+        categoryId: mock.category.id,
+        author: {
+          id: mock.author.id,
+          name: mock.author.name,
+          email: `${mock.author.id}@bbst.uwu.ac.lk`,
+          emailVerified: true,
+          image: mock.author.avatar,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          role: "EDITOR",
+        },
+        category: {
+          id: mock.category.id,
+          name: mock.category.name,
+          slug: mock.category.slug,
+          description: null,
+          iconName: mock.category.iconName || null,
+          coverImage: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        writer: {
+          id: `writer-${mock.author.id}`,
+          name: mock.author.name,
+          slug: mock.author.name
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9\s-]/g, "")
+            .replace(/\s+/g, "-"),
+          bio: mock.author.bio,
+          shortBio: mock.author.bio,
+          profileImageUrl: mock.author.avatar,
+          department: mock.author.department,
+          academicYear: null,
+          role: "Student Contributor",
+          expertise: mock.tags ? mock.tags.slice(0, 3).join(", ") : null,
+          email: null,
+          website: null,
+          socialLinks: mock.author.socials || {},
+          status: "PUBLISHED",
+          isFeatured: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      } as unknown as ArticleDetail;
+    }
   }
 
   if (!article || article.status.toLowerCase() !== "published") {

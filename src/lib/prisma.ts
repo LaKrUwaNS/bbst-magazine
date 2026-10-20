@@ -22,7 +22,7 @@ const pool =
     connectionString,
     max: process.env.NODE_ENV === "production" ? 3 : 10,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000,
+    connectionTimeoutMillis: process.env.NODE_ENV === "production" ? 10000 : 4000,
   });
 
 pool.on("error", (err: Error) => {

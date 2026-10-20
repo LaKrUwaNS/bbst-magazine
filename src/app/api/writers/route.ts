@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { FALLBACK_WRITERS } from "@/data/writers.data";
 
 interface RawWriterListItem {
   id: string;
@@ -148,7 +149,16 @@ export async function GET(request: NextRequest) {
     ) {
       throw error;
     }
-    console.error("[Public Writers API] Error fetching writers:", error);
-    return NextResponse.json({ error: "Failed to fetch writers." }, { status: 500 });
+    console.error("[Public Writers API] Database query failed or timed out, returning fallback writers:", error);
+    return NextResponse.json({
+      success: true,
+      writers: FALLBACK_WRITERS,
+      pagination: {
+        page: 1,
+        pageSize: FALLBACK_WRITERS.length,
+        total: FALLBACK_WRITERS.length,
+        totalPages: 1,
+      },
+    });
   }
 }

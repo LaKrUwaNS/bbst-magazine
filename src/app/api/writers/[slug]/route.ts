@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getFallbackWriterBySlug } from "@/data/writers.data";
 
 interface WriterArticleSummary {
   id: string;
@@ -70,6 +71,14 @@ export async function GET(
     });
 
     if (!writer) {
+      const fallback = getFallbackWriterBySlug(slug);
+      if (fallback) {
+        return NextResponse.json({
+          success: true,
+          writer: fallback,
+        });
+      }
+
       return NextResponse.json(
         { error: "Writer profile not found or is currently private." },
         { status: 404 }
@@ -119,7 +128,19 @@ export async function GET(
       writer: formattedWriter,
     });
   } catch (error) {
-    console.error("[Public Writer Detail API] Error:", error);
+    console.error(`[Public Writer Detail API] Database query failed or timed out for slug ${params}:`, error);
+    try {
+      const { slug } = await params;
+      const fallback = getFallbackWriterBySlug(slug);
+      if (fallback) {
+        return NextResponse.json({
+          success: true,
+          writer: fallback,
+        });
+      }
+    } catch {
+      // ignore
+    }
     return NextResponse.json({ error: "Failed to retrieve writer profile." }, { status: 500 });
   }
 }

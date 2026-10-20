@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { WriterProfileView, WriterDetailData } from "@/components/writers/writer-profile-view";
+import { getFallbackWriterBySlug } from "@/data/writers.data";
 
 interface RawWriterArticleItem {
   id: string;
@@ -25,20 +26,47 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
 
-  const writer = await prisma.writerProfile.findFirst({
-    where: {
-      slug: { equals: slug, mode: "insensitive" },
-      status: "PUBLISHED",
-    },
-    select: {
-      name: true,
-      role: true,
-      department: true,
-      shortBio: true,
-      bio: true,
-      profileImageUrl: true,
-    },
-  });
+  let writer: {
+    name: string;
+    role: string | null;
+    department: string | null;
+    shortBio: string | null;
+    bio: string | null;
+    profileImageUrl: string | null;
+  } | null = null;
+
+  try {
+    writer = await prisma.writerProfile.findFirst({
+      where: {
+        slug: { equals: slug, mode: "insensitive" },
+        status: "PUBLISHED",
+      },
+      select: {
+        name: true,
+        role: true,
+        department: true,
+        shortBio: true,
+        bio: true,
+        profileImageUrl: true,
+      },
+    });
+  } catch (err) {
+    console.error(`[generateMetadata] Error loading writer slug ${slug}:`, err);
+  }
+
+  if (!writer) {
+    const fallback = getFallbackWriterBySlug(slug);
+    if (fallback) {
+      writer = {
+        name: fallback.name,
+        role: fallback.role,
+        department: fallback.department,
+        shortBio: fallback.shortBio,
+        bio: fallback.bio,
+        profileImageUrl: fallback.profileImageUrl,
+      };
+    }
+  }
 
   if (!writer) {
     return {
@@ -71,39 +99,48 @@ export default async function WriterDetailPage({
 }) {
   const { slug } = await params;
 
-  const rawWriter = await prisma.writerProfile.findFirst({
-    where: {
-      slug: { equals: slug, mode: "insensitive" },
-      status: "PUBLISHED",
-    },
-    include: {
-      articles: {
-        where: {
-          status: { in: ["PUBLISHED", "published"] },
-        },
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          excerpt: true,
-          coverImage: true,
-          publishedAt: true,
-          createdAt: true,
-          category: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
+  let rawWriter = null;
+  try {
+    rawWriter = await prisma.writerProfile.findFirst({
+      where: {
+        slug: { equals: slug, mode: "insensitive" },
+        status: "PUBLISHED",
+      },
+      include: {
+        articles: {
+          where: {
+            status: { in: ["PUBLISHED", "published"] },
+          },
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            excerpt: true,
+            coverImage: true,
+            publishedAt: true,
+            createdAt: true,
+            category: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
             },
           },
+          orderBy: { publishedAt: "desc" },
         },
-        orderBy: { publishedAt: "desc" },
       },
-    },
-  });
+    });
+  } catch (error) {
+    console.error(`[WriterDetailPage] Error loading writer ${slug} from DB:`, error);
+  }
 
   if (!rawWriter) {
-    notFound();
+    const fallback = getFallbackWriterBySlug(slug);
+    if (!fallback) {
+      notFound();
+    }
+    return <WriterProfileView writer={fallback} />;
   }
 
   const writer: WriterDetailData = {

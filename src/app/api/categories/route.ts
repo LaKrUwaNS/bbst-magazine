@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { CATEGORY_METADATA } from "@/data/categories.data";
+import { CATEGORY_METADATA, FALLBACK_CATEGORIES } from "@/data/categories.data";
 
 interface DbCategoryWithArticleCount {
   id: string;
@@ -60,10 +60,11 @@ export async function GET() {
       total: categories.length,
     });
   } catch (error) {
-    console.error("[Public Categories API] Error:", error);
-    return NextResponse.json(
-      { error: "Failed to load categories." },
-      { status: 500 }
-    );
+    console.error("[Public Categories API] Database query failed or timed out, returning curated categories:", error);
+    return NextResponse.json({
+      success: true,
+      categories: FALLBACK_CATEGORIES,
+      total: FALLBACK_CATEGORIES.length,
+    });
   }
 }
