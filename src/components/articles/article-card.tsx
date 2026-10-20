@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Clock, Bookmark } from "lucide-react";
 import { Article } from "@/types/article";
 
@@ -68,19 +69,45 @@ export function ArticleCard({ article, onSelect }: ArticleCardProps) {
         <div className="flex items-center justify-between pt-3 border-t border-gray-100 text-xs text-gray-500 mt-auto">
           {/* Author info */}
           <div className="flex items-center gap-2 min-w-0 pr-2">
-            <div className="relative w-6 h-6 rounded-full overflow-hidden bg-gray-100 shrink-0">
-              <Image
-                src={article.author.avatar}
-                alt={article.author.name}
-                fill
-                sizes="24px"
-                className="object-cover"
-              />
-            </div>
+            {article.author.slug ? (
+              <Link
+                href={`/writers/${article.author.slug}`}
+                onClick={(e) => e.stopPropagation()}
+                className="relative w-6 h-6 rounded-full overflow-hidden bg-gray-100 shrink-0 hover:ring-2 hover:ring-[#00E500] transition"
+              >
+                <Image
+                  src={article.author.avatar}
+                  alt={article.author.name}
+                  fill
+                  sizes="24px"
+                  className="object-cover"
+                />
+              </Link>
+            ) : (
+              <div className="relative w-6 h-6 rounded-full overflow-hidden bg-gray-100 shrink-0">
+                <Image
+                  src={article.author.avatar}
+                  alt={article.author.name}
+                  fill
+                  sizes="24px"
+                  className="object-cover"
+                />
+              </div>
+            )}
             <div className="flex flex-col min-w-0">
-              <span className="font-semibold text-gray-900 truncate text-[11px] sm:text-xs">
-                {article.author.name}
-              </span>
+              {article.author.slug ? (
+                <Link
+                  href={`/writers/${article.author.slug}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="font-semibold text-gray-900 hover:text-[#00A800] truncate text-[11px] sm:text-xs transition-colors"
+                >
+                  {article.author.name}
+                </Link>
+              ) : (
+                <span className="font-semibold text-gray-900 truncate text-[11px] sm:text-xs">
+                  {article.author.name}
+                </span>
+              )}
               <span className="text-[10px] text-gray-400">
                 {article.publishedAt}
               </span>

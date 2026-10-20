@@ -72,49 +72,137 @@ model Verification {
 }
 
 model Category {
-  id        String    @id @default(uuid())
-  name      String    @unique
-  slug      String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  articles  Article[]
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  iconName    String?
+  coverImage  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  articles    Article[]
 
   @@map("category")
 }
 
 model MagazineIssue {
-  id              String    @id @default(uuid())
-  title           String
-  slug            String    @unique
-  description     String?
-  coverImage      String?
-  pdfAsset        String?
-  publicationDate DateTime?
-  status          String    @default("draft") // draft, published, archived
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                 String    @id @default(uuid())
+  title              String
+  slug               String    @unique
+  edition            String?
+  description        String?
+  coverImage         String?
+  coverImagePublicId String?
+  pdfAsset           String?
+  pdfAssetPublicId   String?
+  publicationDate    DateTime?
+  publicationYear    Int?
+  isFeatured         Boolean   @default(false)
+  status             String    @default("draft") // draft, published, archived
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   @@map("magazine_issue")
 }
 
 model Article {
-  id         String   @id @default(uuid())
-  title      String
-  slug       String   @unique
-  excerpt    String?
-  content    String? // rich-text
-  coverImage String?
-  status     String   @default("draft") // draft, published, archived
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                 String    @id @default(uuid())
+  title              String
+  slug               String    @unique
+  excerpt            String?
+  content            String? // rich-text HTML
+  coverImage         String?
+  coverImagePublicId String?
+  status             String    @default("DRAFT") // SUBMITTED, UNDER_REVIEW, REVISION_REQUESTED, APPROVED, PUBLISHED, REJECTED, DRAFT
+  tags               String?   // comma-separated tags
+  isFeatured         Boolean   @default(false)
 
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  // Contributor & Attribution metadata
+  authorName         String?
+  authorEmail        String?
+  authorDept         String?
+  enteredByEditor    Boolean   @default(false)
+  submissionSource   String?   // "Web Submission", "Email", "Word Document", "Direct"
+  submissionRef      String?   @unique
 
-  categoryId String?
-  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  // Editorial Review & Feedback
+  editorialFeedback  String?
+  rejectionReason    String?
+  editorialNotes     String?
+  reviewedBy         String?
+  submittedAt        DateTime?
+  reviewedAt         DateTime?
+  publishedAt        DateTime?
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  authorId           String?
+  author             User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  writerId           String?
+  writer             WriterProfile? @relation(fields: [writerId], references: [id], onDelete: SetNull)
+
+  categoryId         String?
+  category           Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  revisions          ArticleRevision[]
 
   @@map("article")
+}
+
+model WriterProfile {
+  id                   String    @id @default(uuid())
+  name                 String
+  slug                 String    @unique
+  bio                  String?
+  shortBio             String?
+  profileImageUrl      String?
+  profileImagePublicId String?
+  department           String?
+  academicYear         String?
+  role                 String?
+  expertise            String?
+  email                String?
+  website              String?
+  socialLinks          Json?
+  status               String    @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
+  isFeatured           Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  articles             Article[]
+
+  @@map("writer_profile")
+}
+
+model ArticleRevision {
+  id          String   @id @default(uuid())
+  articleId   String
+  article     Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  title       String
+  excerpt     String?
+  content     String?
+  coverImage  String?
+  feedback    String?
+  status      String
+  createdById String? // e.g. "editor" or "writer"
+  createdAt   DateTime @default(now())
+
+  @@map("article_revision")
+}
+
+model EditorialActivity {
+  id          String   @id @default(uuid())
+  action      String   // e.g. "ARTICLE_SUBMITTED", "ARTICLE_PUBLISHED", "REVISION_REQUESTED", "MAGAZINE_CREATED", etc.
+  entityType  String   // "ARTICLE", "MAGAZINE", "CATEGORY"
+  entityId    String
+  entityTitle String?
+  performedBy String   // editor email or "writer"
+  details     String?
+  createdAt   DateTime @default(now())
+
+  @@map("editorial_activity")
 }
 
 model AuditLog {
@@ -127,3 +215,4 @@ model AuditLog {
 
   @@map("audit_log")
 }
+

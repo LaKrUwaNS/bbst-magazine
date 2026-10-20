@@ -1,0 +1,66 @@
+import { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
+import { WritersDirectory, PublicWriter } from "@/components/writers/writers-directory";
+
+export const metadata: Metadata = {
+  title: "Meet Our Writers | BBST Student Magazine",
+  description:
+    "Discover the student researchers, writers, and contributors shaping BBST Magazine at Uva Wellassa University.",
+};
+
+export const instant = false;
+
+export default async function WritersPage() {
+  const rawWriters = await prisma.writerProfile.findMany({
+    where: { status: "PUBLISHED" },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      shortBio: true,
+      bio: true,
+      profileImageUrl: true,
+      department: true,
+      academicYear: true,
+      role: true,
+      expertise: true,
+      socialLinks: true,
+      website: true,
+      isFeatured: true,
+      _count: {
+        select: {
+          articles: {
+            where: {
+              status: { in: ["PUBLISHED", "published"] },
+            },
+          },
+        },
+      },
+    },
+    orderBy: [{ isFeatured: "desc" }, { name: "asc" }],
+  });
+
+  const writers: PublicWriter[] = rawWriters.map((w) => ({
+    id: w.id,
+    name: w.name,
+    slug: w.slug,
+    shortBio: w.shortBio || w.bio?.slice(0, 160) || "",
+    profileImageUrl: w.profileImageUrl || "/images/avatar1.jpg",
+    department: w.department || "BBST Department",
+    academicYear: w.academicYear,
+    role: w.role || "Contributor",
+    expertise: w.expertise ? w.expertise.split(",").map((e) => e.trim()).filter(Boolean) : [],
+    socialLinks: (w.socialLinks as Record<string, string>) || {},
+    website: w.website,
+    isFeatured: w.isFeatured,
+    publishedArticlesCount: w._count.articles,
+  }));
+
+  const departmentsSet = new Set<string>();
+  writers.forEach((w) => {
+    if (w.department) departmentsSet.add(w.department);
+  });
+  const departments = Array.from(departmentsSet).sort();
+
+  return <WritersDirectory initialWriters={writers} initialDepartments={departments} />;
+}

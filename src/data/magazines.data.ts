@@ -1,0 +1,225 @@
+import { MagazineIssueItem } from "@/types/magazine";
+
+export const BBST_MAGAZINES: MagazineIssueItem[] = [
+  {
+    id: "mag-vol-02-2025",
+    title: "BBST Student Magazine — Vol 02 / 2025",
+    slug: "bbst-magazine-vol-02-2025",
+    edition: "Volume 02 • Annual Edition",
+    volume: "Vol. 02",
+    issueNumber: 1,
+    year: 2025,
+    category: "research-tech",
+    categoryLabel: "Research & Innovation",
+    description:
+      "Featuring university campus innovations, climate adaptation projects, and in-depth student editorial essays on artificial intelligence and sustainable futures across Sri Lankan biosystems.",
+    coverImage: "/images/Magazine.png",
+    pdfAsset: "/assets/magazines/bbst-magazine-vol-02-2025.pdf",
+    publicationDate: "2025-09-15T00:00:00.000Z",
+    pageCount: 68,
+    fileSize: "14.8 MB",
+    isFeatured: true,
+    highlights: [
+      "AI in Tropical Agriculture: Field Automation in Uva Province",
+      "Next-Gen Biomaterials Extracted from Endemic Flora",
+      "Student Tech Incubator & Prototype Showcase",
+      "Campus Biodiversity & Renewable Microgrid Audit",
+    ],
+    pages: [
+      {
+        pageNumber: 1,
+        title: "Cover & Masthead",
+        excerpt:
+          "Official Student Publication of the Faculty of Technological Studies, Uva Wellassa University of Sri Lanka.",
+        image: "/images/Magazine.png",
+      },
+      {
+        pageNumber: 2,
+        title: "Dean's Foreword & Editorial Note",
+        excerpt:
+          "Celebrating interdisciplinary inquiry, student-led inventions, and the courage to envision resilient bio-systems.",
+      },
+      {
+        pageNumber: 3,
+        title: "Feature: Autonomous Greenhouse Rovers",
+        excerpt:
+          "How student engineers built solar-assisted loT soil sensors for high-elevation strawberry farms.",
+        image: "/images/editorial/technology.jpg",
+      },
+      {
+        pageNumber: 4,
+        title: "Symposium: Indigenous Herbal Taxonomy in Modern Pharma",
+        excerpt:
+          "Analyzing bioactive phytochemicals from Badulla montane forests using spectroscopy.",
+        image: "/images/editorial/science.jpg",
+      },
+      {
+        pageNumber: 5,
+        title: "Student Perspectives: The Future of Campus Tech",
+        excerpt:
+          "Discussions from the Annual Hackathon and collaborative university ventures.",
+        image: "/images/editorial/campus.jpg",
+      },
+      {
+        pageNumber: 6,
+        title: "Creative Showcase & Closing Reflections",
+        excerpt:
+          "Literary contributions, field sketch photography, and alumni mentorship directories.",
+        image: "/images/editorial/arts.jpg",
+      },
+    ],
+    status: "published",
+  },
+  {
+    id: "mag-vol-01-2024",
+    title: "BBST Student Magazine — Vol 01 / 2024",
+    slug: "bbst-magazine-vol-01-2024",
+    edition: "Volume 01 • Issue 02",
+    volume: "Vol. 01",
+    issueNumber: 2,
+    year: 2024,
+    category: "research-tech",
+    categoryLabel: "Technology & Biosystems",
+    description:
+      "A comprehensive exploration of biosystems engineering breakthroughs, student entrepreneurship, and smart automation across agricultural value chains.",
+    coverImage: "/images/editorial/technology.jpg",
+    pdfAsset: "/assets/magazines/bbst-magazine-vol-01-2024.pdf",
+    publicationDate: "2024-11-20T00:00:00.000Z",
+    pageCount: 56,
+    fileSize: "12.2 MB",
+    isFeatured: false,
+    highlights: [
+      "Precision Irrigation and Drip Sensor Networks",
+      "From Campus Lab to Seed Funding: Founders' Roundtable",
+      "Data Science in Crop Yield Forecasting",
+    ],
+    pages: [
+      {
+        pageNumber: 1,
+        title: "Cover & Contents",
+        excerpt: "Technology & Engineering edition focusing on robotics in agriculture.",
+        image: "/images/editorial/technology.jpg",
+      },
+      {
+        pageNumber: 2,
+        title: "Faculty Insights",
+        excerpt: "Bridging theoretical knowledge with commercial prototypes.",
+      },
+      {
+        pageNumber: 3,
+        title: "Smart Sensors Spotlight",
+        excerpt: "Low-cost telemetry hardware designed by third-year undergraduates.",
+      },
+    ],
+    status: "published",
+  },
+  {
+    id: "mag-climate-2024",
+    title: "BBST Special Edition — Climate Resilience & Eco-Systems",
+    slug: "bbst-special-edition-climate-2024",
+    edition: "Special Issue • Summer 2024",
+    volume: "Special Edition",
+    issueNumber: 1,
+    year: 2024,
+    category: "agriculture-environment",
+    categoryLabel: "Agriculture & Environment",
+    description:
+      "Dedicated to environmental restoration, rainwater harvesting in tea plantations, and community-based climate adaptation across central highlands.",
+    coverImage: "/images/editorial/agriculture.jpg",
+    pdfAsset: "/assets/magazines/bbst-special-edition-climate-2024.pdf",
+    publicationDate: "2024-06-10T00:00:00.000Z",
+    pageCount: 48,
+    fileSize: "9.6 MB",
+    isFeatured: false,
+    highlights: [
+      "Micro-Catchment Hydrology in Badulla Hill Slopes",
+      "Biological Pest Management in Protected Cultivation",
+      "Community Forestry and Reforestation Mapping",
+    ],
+    pages: [
+      {
+        pageNumber: 1,
+        title: "Special Issue Cover",
+        excerpt: "Ecological stewardship and resilient agri-tech developments.",
+        image: "/images/editorial/agriculture.jpg",
+      },
+      {
+        pageNumber: 2,
+        title: "Fieldwork Chronicles",
+        excerpt: "Soil analysis across four agro-ecological zones.",
+      },
+    ],
+    status: "published",
+  },
+  {
+    id: "mag-vol-01-2023",
+    title: "BBST Student Magazine — Inaugural Edition 2023",
+    slug: "bbst-inaugural-edition-2023",
+    edition: "Inaugural Volume • Vol. 01",
+    volume: "Vol. 01",
+    issueNumber: 1,
+    year: 2023,
+    category: "campus-culture",
+    categoryLabel: "Campus Culture & Heritage",
+    description:
+      "The historic first volume of BBST Magazine, capturing the foundation of our editorial society, early campus memories, and student creative essays.",
+    coverImage: "/images/editorial/campus.jpg",
+    pdfAsset: "/assets/magazines/bbst-inaugural-edition-2023.pdf",
+    publicationDate: "2023-12-05T00:00:00.000Z",
+    pageCount: 52,
+    fileSize: "10.4 MB",
+    isFeatured: false,
+    highlights: [
+      "The Genesis of BBST Magazine: Founder Interviews",
+      "Pioneering Student Dissertations in Food Science",
+      "Campus Cultural Festivals & Arts Archive",
+    ],
+    pages: [
+      {
+        pageNumber: 1,
+        title: "Inaugural Cover",
+        excerpt: "Celebrating the launch of Uva Wellassa University's student publication.",
+        image: "/images/editorial/campus.jpg",
+      },
+      {
+        pageNumber: 2,
+        title: "Editorial Vision",
+        excerpt: "Building a platform for vibrant academic discourse and creative expression.",
+      },
+    ],
+    status: "published",
+  },
+  {
+    id: "mag-arts-2023",
+    title: "BBST Arts, Literature & Student Perspectives 2023",
+    slug: "bbst-arts-literature-2023",
+    edition: "Anthology • Issue 01",
+    volume: "Special Edition",
+    issueNumber: 2,
+    year: 2023,
+    category: "special-edition",
+    categoryLabel: "Arts & Literature",
+    description:
+      "A rich anthology of student poetry, landscape photography of the Namunukula range, short stories, and reflective essays on university life.",
+    coverImage: "/images/editorial/arts.jpg",
+    pdfAsset: "/assets/magazines/bbst-arts-literature-2023.pdf",
+    publicationDate: "2023-08-18T00:00:00.000Z",
+    pageCount: 44,
+    fileSize: "8.5 MB",
+    isFeatured: false,
+    highlights: [
+      "Passara Hills & Namunukula Photo Essays",
+      "Bilingual Poetry in Sinhala, Tamil, and English",
+      "Student Essays on Empathy in Science & Engineering",
+    ],
+    pages: [
+      {
+        pageNumber: 1,
+        title: "Anthology Cover",
+        excerpt: "Creative prose, visual arts, and literary student showcases.",
+        image: "/images/editorial/arts.jpg",
+      },
+    ],
+    status: "published",
+  },
+];

@@ -8,6 +8,7 @@ export type ArticleFilter =
 export interface ArticleAuthor {
   id: string;
   name: string;
+  slug?: string;
   department: string;
   avatar: string;
   bio: string;

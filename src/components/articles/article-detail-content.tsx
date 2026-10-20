@@ -2,14 +2,8 @@
 
 import React from "react";
 import Image from "next/image";
-import {
-  Calendar,
-  Clock,
-  Eye,
-  Tag,
-  ChevronRight,
-  Home,
-} from "lucide-react";
+import Link from "next/link";
+import { Calendar, Clock, Eye, Tag, ChevronRight, Home } from "lucide-react";
 import { Article } from "@/types/article";
 import { ArticleShareActions } from "./article-share-actions";
 import { ArticleAuthorCard } from "./article-author-card";
@@ -66,7 +60,7 @@ export function ArticleDetailContent({
           {article.category.name}
         </button>
         <ChevronRight className="w-3 h-3 text-gray-300 hidden sm:inline" />
-        <span className="text-gray-600 truncate max-w-[200px] hidden sm:inline">
+        <span className="text-gray-600 truncate max-w-50 hidden sm:inline">
           {article.title}
         </span>
       </nav>
@@ -92,18 +86,45 @@ export function ArticleDetailContent({
       <div className="flex flex-wrap items-center justify-between gap-4 py-3 border-y border-gray-100 text-xs text-gray-500 mb-6">
         {/* Author info */}
         <div className="flex items-center gap-3">
-          <div className="relative w-9 h-9 rounded-full overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
-            <Image
-              src={article.author.avatar}
-              alt={article.author.name}
-              fill
-              sizes="36px"
-              className="object-cover"
-            />
-          </div>
+          {article.author.slug ? (
+            <Link
+              href={`/writers/${article.author.slug}`}
+              className="relative w-9 h-9 rounded-full overflow-hidden bg-gray-100 shrink-0 border border-gray-200 hover:ring-2 hover:ring-[#00E500] transition"
+            >
+              <Image
+                src={article.author.avatar}
+                alt={article.author.name}
+                fill
+                sizes="36px"
+                className="object-cover"
+              />
+            </Link>
+          ) : (
+            <div className="relative w-9 h-9 rounded-full overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+              <Image
+                src={article.author.avatar}
+                alt={article.author.name}
+                fill
+                sizes="36px"
+                className="object-cover"
+              />
+            </div>
+          )}
           <div>
             <div className="font-bold text-[#171717] text-xs sm:text-sm">
-              {article.author.name}
+              {article.author.slug ? (
+                <Link
+                  href={`/writers/${article.author.slug}`}
+                  className="hover:text-emerald-700 transition-colors inline-flex items-center gap-1"
+                >
+                  <span>{article.author.name}</span>
+                  <span className="text-[10px] text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded font-semibold">
+                    Writer Profile
+                  </span>
+                </Link>
+              ) : (
+                article.author.name
+              )}
             </div>
             <div className="text-[11px] text-gray-400">
               {article.author.department}
@@ -133,7 +154,7 @@ export function ArticleDetailContent({
       </div>
 
       {/* 6. Large Featured Image */}
-      <div className="relative w-full aspect-16/9 sm:h-[380px] rounded-2xl overflow-hidden bg-gray-100 mb-8 border border-gray-100 shadow-2xs">
+      <div className="relative w-full aspect-video sm:h-95 rounded-2xl overflow-hidden bg-gray-100 mb-8 border border-gray-100 shadow-2xs">
         <Image
           src={article.coverImage}
           alt={article.title}

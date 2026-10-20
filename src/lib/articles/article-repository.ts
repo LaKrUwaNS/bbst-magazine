@@ -39,6 +39,27 @@ export interface ArticleRepository {
  */
 export class MockArticleRepository implements ArticleRepository {
   async getArticles(params?: GetArticlesParams): Promise<Article[]> {
+    // In browser, attempt to fetch live published articles from PostgreSQL
+    if (typeof window !== "undefined") {
+      try {
+        const queryParams = new URLSearchParams();
+        if (params?.filter) queryParams.set("filter", params.filter);
+        if (params?.category) queryParams.set("category", params.category);
+        if (params?.tag) queryParams.set("tag", params.tag);
+        if (params?.search) queryParams.set("q", params.search);
+
+        const res = await fetch(`/api/articles?${queryParams.toString()}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json.articles)) {
+            return json.articles as Article[];
+          }
+        }
+      } catch (err) {
+        console.warn("[ArticleRepository] Live fetch fallback to mock data:", err);
+      }
+    }
+
     let result = [...MOCK_ARTICLES];
 
     // Filter by tab filter
@@ -100,6 +121,23 @@ export class MockArticleRepository implements ArticleRepository {
   }
 
   async getArticleBySlug(slug: string): Promise<Article | null> {
+    if (typeof window !== "undefined") {
+      try {
+        const res = await fetch(`/api/articles`);
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json.articles)) {
+            const found = (json.articles as Article[]).find(
+              (a) => a.slug.toLowerCase() === slug.toLowerCase()
+            );
+            if (found) return found;
+          }
+        }
+      } catch (err) {
+        console.warn("[ArticleRepository] Error fetching article by slug:", err);
+      }
+    }
+
     const article = MOCK_ARTICLES.find(
       (a) => a.slug.toLowerCase() === slug.toLowerCase(),
     );
@@ -111,11 +149,30 @@ export class MockArticleRepository implements ArticleRepository {
     categorySlug?: string,
     limit: number = 3,
   ): Promise<Article[]> {
+    if (typeof window !== "undefined") {
+      try {
+        const query = categorySlug ? `?category=${encodeURIComponent(categorySlug)}` : "";
+        const res = await fetch(`/api/articles${query}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json.articles)) {
+            const filtered = (json.articles as Article[]).filter(
+              (a) => a.slug.toLowerCase() !== currentSlug.toLowerCase()
+            );
+            if (filtered.length > 0) {
+              return filtered.slice(0, limit);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("[ArticleRepository] Error fetching related articles:", err);
+      }
+    }
+
     const pool = MOCK_ARTICLES.filter(
       (a) => a.slug.toLowerCase() !== currentSlug.toLowerCase(),
     );
 
-    // Prefer same category if available
     let related = categorySlug
       ? pool.filter((a) => a.category.slug === categorySlug)
       : [];
@@ -129,6 +186,20 @@ export class MockArticleRepository implements ArticleRepository {
   }
 
   async getLatestArticles(limit: number = 4): Promise<Article[]> {
+    if (typeof window !== "undefined") {
+      try {
+        const res = await fetch("/api/articles?filter=latest");
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json.articles) && json.articles.length > 0) {
+            return (json.articles as Article[]).slice(0, limit);
+          }
+        }
+      } catch (err) {
+        console.warn("[ArticleRepository] Error fetching latest articles:", err);
+      }
+    }
+
     return [...MOCK_ARTICLES]
       .sort(
         (a, b) =>
@@ -139,10 +210,56 @@ export class MockArticleRepository implements ArticleRepository {
   }
 
   async getCategories(): Promise<CategoryWithCount[]> {
+    if (typeof window !== "undefined") {
+      try {
+        const res = await fetch("/api/categories");
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json.categories) && json.categories.length > 0) {
+            return json.categories.map(
+              (c: { id: string; name: string; slug: string; iconName?: string; articleCount?: number; count?: number }) => ({
+                id: c.id,
+                name: c.name,
+                slug: c.slug,
+                iconName: c.iconName || "Folder",
+                count: c.articleCount ?? c.count ?? 0,
+              })
+            );
+          }
+        }
+      } catch (err) {
+        console.warn("[ArticleRepository] Error fetching live categories:", err);
+      }
+    }
+
     return MOCK_CATEGORIES;
   }
 
   async getPopularTags(): Promise<string[]> {
+    if (typeof window !== "undefined") {
+      try {
+        const res = await fetch("/api/articles");
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json.articles)) {
+            const tagsSet = new Set<string>();
+            json.articles.forEach((a: Article) => {
+              if (Array.isArray(a.tags)) {
+                a.tags.forEach((t) => {
+                  if (t && t.trim()) tagsSet.add(t.trim());
+                });
+              }
+            });
+            if (tagsSet.size > 0) {
+              return Array.from(tagsSet).slice(0, 8);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("[ArticleRepository] Error fetching popular tags:", err);
+      }
+    }
+
     return MOCK_POPULAR_TAGS;
   }
 }
