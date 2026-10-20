@@ -8,17 +8,27 @@ import { z } from "zod";
 
 const updateArticleSchema = z.object({
   title: z.string().trim().min(3).optional(),
-  slug: z.string().trim().optional(),
+  slug: z.string().trim().optional().nullable(),
   excerpt: z.string().trim().optional().nullable(),
   content: z.string().trim().optional(),
   authorName: z.string().trim().optional(),
-  authorEmail: z.string().trim().email().optional().nullable().or(z.literal("")),
+  authorEmail: z
+    .string()
+    .trim()
+    .email()
+    .optional()
+    .nullable()
+    .or(z.literal(""))
+    .or(z.null()),
   authorDept: z.string().trim().optional().nullable(),
   writerId: z.string().optional().nullable(),
   categoryId: z.string().optional().nullable(),
   coverImage: z.string().optional().nullable(),
   coverImagePublicId: z.string().optional().nullable(),
-  tags: z.string().optional().nullable(),
+  tags: z
+    .union([z.string(), z.array(z.string()).transform((arr) => arr.join(", "))])
+    .optional()
+    .nullable(),
   status: z
     .enum([
       "DRAFT",

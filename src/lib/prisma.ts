@@ -20,9 +20,9 @@ const pool =
   globalForPrisma.pool ??
   new Pool({
     connectionString,
-    max: 10,
+    max: process.env.NODE_ENV === "production" ? 3 : 10,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: 10000,
   });
 
 pool.on("error", (err: Error) => {
@@ -34,8 +34,21 @@ const adapter = new PrismaPg(pool);
 export const prisma =
   globalForPrisma.prisma ?? new PrismaClient({ adapter });
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-  globalForPrisma.pool = pool;
-}
+// Cache both prisma and pool on globalThis for development HMR and warm serverless container reuse
+globalForPrisma.prisma = prisma;
+globalForPrisma.pool = pool;
+
+// Re-export common Prisma model types and Prisma namespace
+export type {
+  Prisma,
+  PrismaClient,
+  MagazineIssue,
+  Article,
+  Category,
+  WriterProfile,
+  ArticleRevision,
+  EditorialActivity,
+  AuditLog,
+  User,
+} from "@prisma/client";
 

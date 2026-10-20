@@ -3,6 +3,20 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { WriterProfileView, WriterDetailData } from "@/components/writers/writer-profile-view";
 
+interface RawWriterArticleItem {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  coverImage: string | null;
+  publishedAt: Date | null;
+  createdAt: Date;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
+}
 
 export async function generateMetadata({
   params,
@@ -103,14 +117,14 @@ export default async function WriterDetailPage({
     academicYear: rawWriter.academicYear,
     role: rawWriter.role || "Writer & Contributor",
     expertise: rawWriter.expertise
-      ? rawWriter.expertise.split(",").map((e) => e.trim()).filter(Boolean)
+      ? rawWriter.expertise.split(",").map((e: string) => e.trim()).filter(Boolean)
       : [],
     website: rawWriter.website,
     email: rawWriter.email,
     socialLinks: (rawWriter.socialLinks as Record<string, string>) || {},
     isFeatured: rawWriter.isFeatured,
     publishedArticlesCount: rawWriter.articles.length,
-    articles: rawWriter.articles.map((art) => ({
+    articles: rawWriter.articles.map((art: RawWriterArticleItem) => ({
       id: art.id,
       title: art.title,
       slug: art.slug,

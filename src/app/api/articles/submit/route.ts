@@ -31,7 +31,7 @@ const submitArticleSchema = z.object({
     .trim()
     .min(5, "Title must be at least 5 characters")
     .max(200, "Title is too long"),
-  excerpt: z.string().trim().max(500, "Excerpt is too long").optional(),
+  excerpt: z.string().trim().max(500, "Excerpt is too long").nullish().transform((v) => v || undefined),
   content: z
     .string()
     .trim()
@@ -45,11 +45,11 @@ const submitArticleSchema = z.object({
     .string()
     .trim()
     .email("A valid email address is required for editorial correspondence"),
-  authorDept: z.string().trim().max(100).optional(),
-  categoryId: z.string().optional(),
-  coverImage: z.string().optional(),
-  coverImagePublicId: z.string().optional(),
-  tags: z.string().optional(),
+  authorDept: z.string().trim().max(100).nullish().transform((v) => v || undefined),
+  categoryId: z.string().nullish().transform((v) => v || undefined),
+  coverImage: z.string().nullish().transform((v) => v || undefined),
+  coverImagePublicId: z.string().nullish().transform((v) => v || undefined),
+  tags: z.string().nullish().transform((v) => v || undefined),
   agreeTerms: z.boolean().refine((val) => val === true, {
     message: "You must agree to the BBST publication guidelines and terms",
   }),

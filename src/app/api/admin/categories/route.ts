@@ -16,6 +16,19 @@ const categorySchema = z.object({
   coverImage: z.string().optional().nullable(),
 });
 
+interface CategoryWithArticleCount {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  iconName: string | null;
+  coverImage: string | null;
+  createdAt: Date;
+  _count: {
+    articles: number;
+  };
+}
+
 // GET /api/admin/categories - List categories with article counts
 export async function GET() {
   try {
@@ -30,7 +43,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      categories: categories.map((c) => ({
+      categories: categories.map((c: CategoryWithArticleCount) => ({
         id: c.id,
         name: c.name,
         slug: c.slug,
@@ -59,7 +72,7 @@ export async function POST(request: NextRequest) {
     const parsed = categorySchema.safeParse(body);
 
     if (!parsed.success) {
-      const issues = parsed.error.issues.map((i) => i.message).join(", ");
+      const issues = parsed.error.issues.map((i: z.ZodIssue) => i.message).join(", ");
       return NextResponse.json({ error: issues }, { status: 400 });
     }
 

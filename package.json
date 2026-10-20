@@ -4,12 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint",
     "test": "tsx scripts/verify-system.ts",
     "seed": "tsx prisma/seed.ts",
-    "hash-password": "node scripts/generate-hash.mjs"
+    "hash-password": "node scripts/generate-hash.mjs",
+    "db:migrate:deploy": "prisma migrate deploy"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -33,6 +36,7 @@
     "lucide-react": "^1.55.0",
     "next": "16.4.0",
     "pg": "^8.23.1",
+    "prisma": "^7.10.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-hook-form": "^7.89.0",
@@ -50,9 +54,15 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
-    "prisma": "^7.10.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "prisma",
+      "@prisma/client",
+      "@prisma/engines"
+    ]
   }
 }

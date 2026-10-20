@@ -13,8 +13,8 @@ const actionSchema = z.object({
     "REJECT",
     "MOVE_TO_REVIEW",
   ]),
-  feedback: z.string().trim().optional(),
-  reason: z.string().trim().optional(),
+  feedback: z.string().trim().nullish().transform((v) => v || undefined),
+  reason: z.string().trim().nullish().transform((v) => v || undefined),
 });
 
 export async function POST(

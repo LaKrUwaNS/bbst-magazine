@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { getEditorialDashboardStats } from "@/lib/editorial/editorial-service";
 import { prisma } from "@/lib/prisma";
+import type { MagazineIssue, EditorialActivity } from "@prisma/client";
 import { AdminMagazineTable, AdminMagazine } from "@/components/admin/admin-magazine-table";
 import {
   Inbox,
@@ -23,6 +24,14 @@ export const metadata: Metadata = {
 
 export const instant = false;
 
+interface DashboardRecentSubmission {
+  id: string;
+  title: string;
+  authorName: string | null;
+  status: string;
+  category?: { name: string } | null;
+}
+
 export default async function AdminDashboardPage() {
   const stats = await getEditorialDashboardStats();
 
@@ -32,7 +41,7 @@ export default async function AdminDashboardPage() {
       orderBy: { updatedAt: "desc" },
       take: 5,
     });
-    recentMagazines = rawMags.map((m) => ({
+    recentMagazines = rawMags.map((m: MagazineIssue) => ({
       id: m.id,
       title: m.title,
       slug: m.slug,
@@ -265,7 +274,7 @@ export default async function AdminDashboardPage() {
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
-              {stats.recentSubmissions.map((sub) => (
+              {stats.recentSubmissions.map((sub: DashboardRecentSubmission) => (
                 <div
                   key={sub.id}
                   className="py-3 flex items-center justify-between gap-3 text-xs group"
@@ -311,7 +320,7 @@ export default async function AdminDashboardPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {stats.recentActivity.map((log) => (
+              {stats.recentActivity.map((log: EditorialActivity) => (
                 <div
                   key={log.id}
                   className="p-3 rounded-2xl bg-gray-50 border border-gray-100 text-xs space-y-1"

@@ -1,6 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+interface RawWriterListItem {
+  id: string;
+  name: string;
+  slug: string;
+  shortBio: string | null;
+  bio: string | null;
+  profileImageUrl: string | null;
+  department: string | null;
+  academicYear: string | null;
+  role: string | null;
+  expertise: string | null;
+  socialLinks: unknown;
+  website: string | null;
+  isFeatured: boolean;
+  createdAt: Date;
+  _count: {
+    articles: number;
+  };
+}
+
+interface FormattedWriterItem {
+  id: string;
+  name: string;
+  slug: string;
+  shortBio: string;
+  profileImageUrl: string;
+  department: string;
+  academicYear: string | null;
+  role: string;
+  expertise: string[];
+  socialLinks: Record<string, string>;
+  website: string | null;
+  isFeatured: boolean;
+  publishedArticlesCount: number;
+}
+
 // GET /api/writers - Public writers directory endpoint
 export async function GET(request: NextRequest) {
   try {
@@ -73,7 +109,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Format writers with published article count
-    const writers = rawWriters.map((w) => ({
+    const writers: FormattedWriterItem[] = rawWriters.map((w: RawWriterListItem) => ({
       id: w.id,
       name: w.name,
       slug: w.slug,
@@ -82,7 +118,7 @@ export async function GET(request: NextRequest) {
       department: w.department || "BBST Department",
       academicYear: w.academicYear,
       role: w.role || "Contributor",
-      expertise: w.expertise ? w.expertise.split(",").map((e) => e.trim()).filter(Boolean) : [],
+      expertise: w.expertise ? w.expertise.split(",").map((e: string) => e.trim()).filter(Boolean) : [],
       socialLinks: (w.socialLinks as Record<string, string>) || {},
       website: w.website,
       isFeatured: w.isFeatured,
@@ -90,7 +126,7 @@ export async function GET(request: NextRequest) {
     }));
 
     if (sortBy === "articles") {
-      writers.sort((a, b) => b.publishedArticlesCount - a.publishedArticlesCount);
+      writers.sort((a: FormattedWriterItem, b: FormattedWriterItem) => b.publishedArticlesCount - a.publishedArticlesCount);
     }
 
     return NextResponse.json({
@@ -103,7 +139,15 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / pageSize) || 1,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "digest" in error &&
+      (error as { digest: string }).digest === "NEXT_PRERENDER_INTERRUPTED"
+    ) {
+      throw error;
+    }
     console.error("[Public Writers API] Error fetching writers:", error);
     return NextResponse.json({ error: "Failed to fetch writers." }, { status: 500 });
   }

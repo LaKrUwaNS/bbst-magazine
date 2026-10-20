@@ -6,19 +6,29 @@ import { sanitizeHtml } from "@/lib/sanitize";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-const createEditorArticleSchema = z.object({
+export const createEditorArticleSchema = z.object({
   title: z.string().trim().min(3, "Title must be at least 3 characters"),
-  slug: z.string().trim().optional(),
-  excerpt: z.string().trim().optional(),
+  slug: z.string().trim().nullish().transform((v) => v || undefined),
+  excerpt: z.string().trim().nullish().transform((v) => v || undefined),
   content: z.string().trim().min(20, "Content must be provided"),
   authorName: z.string().trim().min(2, "Author name is required"),
-  authorEmail: z.string().trim().email("Valid email required").optional().or(z.literal("")),
-  authorDept: z.string().trim().optional(),
-  writerId: z.string().optional().nullable(),
-  categoryId: z.string().optional(),
-  coverImage: z.string().optional(),
-  coverImagePublicId: z.string().optional(),
-  tags: z.union([z.string(), z.array(z.string()).transform((arr) => arr.join(", "))]).optional(),
+  authorEmail: z
+    .string()
+    .trim()
+    .email("Valid email required")
+    .nullish()
+    .or(z.literal(""))
+    .or(z.null())
+    .transform((v) => v || undefined),
+  authorDept: z.string().trim().nullish().transform((v) => v || undefined),
+  writerId: z.string().nullish().transform((v) => v || undefined),
+  categoryId: z.string().nullish().transform((v) => v || undefined),
+  coverImage: z.string().nullish().transform((v) => v || undefined),
+  coverImagePublicId: z.string().nullish().transform((v) => v || undefined),
+  tags: z
+    .union([z.string(), z.array(z.string()).transform((arr) => arr.join(", "))])
+    .nullish()
+    .transform((v) => v || undefined),
   status: z
     .enum([
       "DRAFT",
@@ -31,8 +41,8 @@ const createEditorArticleSchema = z.object({
     ])
     .default("DRAFT"),
   isFeatured: z.boolean().optional(),
-  submissionSource: z.string().trim().optional(),
-  editorialNotes: z.string().trim().optional(),
+  submissionSource: z.string().trim().nullish().transform((v) => v || undefined),
+  editorialNotes: z.string().trim().nullish().transform((v) => v || undefined),
 });
 
 // GET /api/admin/articles - List all articles

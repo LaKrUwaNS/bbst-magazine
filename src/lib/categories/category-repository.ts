@@ -8,6 +8,18 @@ import {
   FALLBACK_CATEGORIES,
 } from "@/data/categories.data";
 
+interface DbCategoryQueryResult {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  iconName: string | null;
+  coverImage: string | null;
+  _count: {
+    articles: number;
+  };
+}
+
 export interface GetCategoriesOptions {
   query?: string;
   sortBy?: CategorySortOption;
@@ -35,7 +47,7 @@ export class CategoryRepository {
       });
 
       if (dbCategories.length > 0) {
-        items = dbCategories.map((c) => {
+        items = dbCategories.map((c: DbCategoryQueryResult) => {
           const meta = CATEGORY_METADATA[c.slug] || {
             description: "Explore articles, research papers, and student perspectives in this field.",
             iconName: "Folder",
@@ -66,7 +78,7 @@ export class CategoryRepository {
     if (options?.query && options.query.trim()) {
       const q = options.query.toLowerCase().trim();
       items = items.filter(
-        (c) =>
+        (c: CategoryDetailItem) =>
           c.name.toLowerCase().includes(q) ||
           c.description.toLowerCase().includes(q)
       );
@@ -76,13 +88,13 @@ export class CategoryRepository {
     if (options?.sortBy) {
       switch (options.sortBy) {
         case "articles":
-          items.sort((a, b) => b.articleCount - a.articleCount);
+          items.sort((a: CategoryDetailItem, b: CategoryDetailItem) => b.articleCount - a.articleCount);
           break;
         case "name-asc":
-          items.sort((a, b) => a.name.localeCompare(b.name));
+          items.sort((a: CategoryDetailItem, b: CategoryDetailItem) => a.name.localeCompare(b.name));
           break;
         case "name-desc":
-          items.sort((a, b) => b.name.localeCompare(a.name));
+          items.sort((a: CategoryDetailItem, b: CategoryDetailItem) => b.name.localeCompare(a.name));
           break;
       }
     }
@@ -95,7 +107,7 @@ export class CategoryRepository {
    */
   async getFeaturedCategories(): Promise<CategoryDetailItem[]> {
     const all = await this.getCategories();
-    return all.filter((c) => c.isFeatured);
+    return all.filter((c: CategoryDetailItem) => c.isFeatured);
   }
 }
 

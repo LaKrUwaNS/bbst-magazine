@@ -8,6 +8,25 @@ export const metadata: Metadata = {
     "Discover the student researchers, writers, and contributors shaping BBST Magazine at Uva Wellassa University.",
 };
 
+interface RawWriterDirectoryItem {
+  id: string;
+  name: string;
+  slug: string;
+  shortBio: string | null;
+  bio: string | null;
+  profileImageUrl: string | null;
+  department: string | null;
+  academicYear: string | null;
+  role: string | null;
+  expertise: string | null;
+  socialLinks: unknown;
+  website: string | null;
+  isFeatured: boolean;
+  _count: {
+    articles: number;
+  };
+}
+
 export const instant = false;
 
 export default async function WritersPage() {
@@ -40,7 +59,7 @@ export default async function WritersPage() {
     orderBy: [{ isFeatured: "desc" }, { name: "asc" }],
   });
 
-  const writers: PublicWriter[] = rawWriters.map((w) => ({
+  const writers: PublicWriter[] = rawWriters.map((w: RawWriterDirectoryItem) => ({
     id: w.id,
     name: w.name,
     slug: w.slug,
@@ -49,7 +68,7 @@ export default async function WritersPage() {
     department: w.department || "BBST Department",
     academicYear: w.academicYear,
     role: w.role || "Contributor",
-    expertise: w.expertise ? w.expertise.split(",").map((e) => e.trim()).filter(Boolean) : [],
+    expertise: w.expertise ? w.expertise.split(",").map((e: string) => e.trim()).filter(Boolean) : [],
     socialLinks: (w.socialLinks as Record<string, string>) || {},
     website: w.website,
     isFeatured: w.isFeatured,
@@ -57,7 +76,7 @@ export default async function WritersPage() {
   }));
 
   const departmentsSet = new Set<string>();
-  writers.forEach((w) => {
+  writers.forEach((w: PublicWriter) => {
     if (w.department) departmentsSet.add(w.department);
   });
   const departments = Array.from(departmentsSet).sort();

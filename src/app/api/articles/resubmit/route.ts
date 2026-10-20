@@ -6,10 +6,10 @@ import { sanitizeHtml } from "@/lib/sanitize";
 const resubmitSchema = z.object({
   submissionRef: z.string().trim().min(5, "Valid submission reference is required"),
   title: z.string().trim().min(5, "Title must be at least 5 characters"),
-  excerpt: z.string().trim().optional(),
+  excerpt: z.string().trim().nullish().transform((v) => v || undefined),
   content: z.string().trim().min(50, "Content must contain at least 50 characters"),
-  coverImage: z.string().optional(),
-  coverImagePublicId: z.string().optional(),
+  coverImage: z.string().nullish().transform((v) => v || undefined),
+  coverImagePublicId: z.string().nullish().transform((v) => v || undefined),
 });
 
 export async function POST(request: NextRequest) {

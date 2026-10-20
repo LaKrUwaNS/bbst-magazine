@@ -2,6 +2,18 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { CATEGORY_METADATA } from "@/data/categories.data";
 
+interface DbCategoryWithArticleCount {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  iconName: string | null;
+  coverImage: string | null;
+  _count: {
+    articles: number;
+  };
+}
+
 // GET /api/categories - Public categories listing with accurate article counts
 export async function GET() {
   try {
@@ -20,7 +32,7 @@ export async function GET() {
       },
     });
 
-    const categories = dbCategories.map((c) => {
+    const categories = dbCategories.map((c: DbCategoryWithArticleCount) => {
       const meta = CATEGORY_METADATA[c.slug] || {
         description: "Explore articles, research papers, and student perspectives in this field.",
         iconName: "Folder",

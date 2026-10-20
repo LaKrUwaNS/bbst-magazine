@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import type { MagazineIssue } from "@prisma/client";
 import { AdminMagazineTable, AdminMagazine } from "@/components/admin/admin-magazine-table";
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export default async function AdminMagazinesPage() {
       orderBy: { updatedAt: "desc" },
     });
 
-    magazines = dbIssues.map((m) => ({
+    magazines = dbIssues.map((m: MagazineIssue) => ({
       id: m.id,
       title: m.title,
       slug: m.slug,

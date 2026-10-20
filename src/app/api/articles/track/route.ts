@@ -51,7 +51,15 @@ export async function GET(request: NextRequest) {
         slug: article.status === "PUBLISHED" ? article.slug : null,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "digest" in error &&
+      (error as { digest: string }).digest === "NEXT_PRERENDER_INTERRUPTED"
+    ) {
+      throw error;
+    }
     console.error("[Article Track API] Error tracking submission:", error);
     return NextResponse.json(
       { error: "Failed to retrieve submission details." },

@@ -5,20 +5,27 @@ import { v2 as cloudinary } from "cloudinary";
 
 // Initialize Cloudinary if credentials are configured
 const isCloudinaryConfigured =
-  Boolean(process.env.CLOUDINARY_CLOUD_NAME) &&
-  process.env.CLOUDINARY_CLOUD_NAME !== "YOUR_CLOUD_NAME" &&
-  Boolean(process.env.CLOUDINARY_API_KEY) &&
-  process.env.CLOUDINARY_API_KEY !== "YOUR_API_KEY" &&
-  Boolean(process.env.CLOUDINARY_API_SECRET) &&
-  process.env.CLOUDINARY_API_SECRET !== "YOUR_API_SECRET";
+  (Boolean(process.env.CLOUDINARY_URL) && !process.env.CLOUDINARY_URL?.includes("YOUR_")) ||
+  (Boolean(process.env.CLOUDINARY_CLOUD_NAME) &&
+    process.env.CLOUDINARY_CLOUD_NAME !== "YOUR_CLOUD_NAME" &&
+    Boolean(process.env.CLOUDINARY_API_KEY) &&
+    process.env.CLOUDINARY_API_KEY !== "YOUR_API_KEY" &&
+    Boolean(process.env.CLOUDINARY_API_SECRET) &&
+    process.env.CLOUDINARY_API_SECRET !== "YOUR_API_SECRET");
 
 if (isCloudinaryConfigured) {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-    secure: true,
-  });
+  if (process.env.CLOUDINARY_URL && !process.env.CLOUDINARY_URL.includes("YOUR_")) {
+    cloudinary.config({
+      secure: true,
+    });
+  } else {
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+      secure: true,
+    });
+  }
 }
 
 export interface UploadResult {

@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+interface WriterArticleSummary {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  coverImage: string | null;
+  publishedAt: Date | null;
+  createdAt: Date;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
+}
+
 // GET /api/writers/[slug] - Public individual writer profile endpoint
 export async function GET(
   request: NextRequest,
@@ -72,13 +87,13 @@ export async function GET(
       academicYear: writer.academicYear,
       role: writer.role || "Writer & Researcher",
       expertise: writer.expertise
-        ? writer.expertise.split(",").map((e) => e.trim()).filter(Boolean)
+        ? writer.expertise.split(",").map((e: string) => e.trim()).filter(Boolean)
         : [],
       website: writer.website,
       socialLinks: (writer.socialLinks as Record<string, string>) || {},
       isFeatured: writer.isFeatured,
       publishedArticlesCount: writer.articles.length,
-      articles: writer.articles.map((art) => ({
+      articles: writer.articles.map((art: WriterArticleSummary) => ({
         id: art.id,
         title: art.title,
         slug: art.slug,

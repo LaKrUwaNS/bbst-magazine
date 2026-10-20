@@ -146,7 +146,7 @@ export default async function ArticleDetailPage({
             <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-1">
               Tags:
             </span>
-            {article.tags.split(",").map((t) => (
+            {article.tags.split(",").map((t: string) => (
               <span
                 key={t}
                 className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-600"

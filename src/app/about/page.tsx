@@ -22,6 +22,14 @@ export const metadata: Metadata = {
   },
 };
 
+interface EditorUserSummary {
+  id: string;
+  name: string;
+  email: string;
+  image: string | null;
+  role: string | null;
+}
+
 export const instant = false;
 
 export default async function AboutPage() {
@@ -61,7 +69,7 @@ export default async function AboutPage() {
 
     // If editor users exist in DB with valid details, map them
     if (editorUsers && editorUsers.length > 0) {
-      teamMembers = editorUsers.map((u, i) => {
+      teamMembers = editorUsers.map((u: EditorUserSummary, i: number) => {
         const defaultRoles = [
           "Editor-in-Chief",
           "Associate Editor — Sciences",

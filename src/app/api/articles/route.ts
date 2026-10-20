@@ -1,6 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+interface ArticleWithRelations {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  content: string | null;
+  coverImage: string | null;
+  status: string;
+  tags: string | null;
+  authorName: string | null;
+  authorEmail: string | null;
+  authorDept: string | null;
+  authorId: string | null;
+  writerId: string | null;
+  publishedAt: Date | null;
+  createdAt: Date;
+  category: { id: string; name: string; slug: string } | null;
+  author: { id: string; name: string; email: string; image: string | null } | null;
+  writer: {
+    id: string;
+    name: string;
+    slug: string;
+    email: string | null;
+    department: string | null;
+    profileImageUrl: string | null;
+    shortBio: string | null;
+    bio: string | null;
+    socialLinks: unknown;
+  } | null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -45,7 +76,7 @@ export async function GET(request: NextRequest) {
       orderBy,
     });
 
-    const articles = dbArticles.map((a) => {
+    const articles = dbArticles.map((a: ArticleWithRelations) => {
       const authorName = a.writer?.name || a.authorName || a.author?.name || "BBST Contributor";
       const authorEmail = a.writer?.email || a.author?.email || a.authorEmail || undefined;
       const authorDept = a.writer?.department || a.authorDept || "Uva Wellassa University";
@@ -56,14 +87,14 @@ export async function GET(request: NextRequest) {
         `${authorName} is an active student researcher and contributor to BBST Magazine.`;
       const authorSlug = a.writer?.slug || undefined;
       const authorSocials = (a.writer?.socialLinks as Record<string, string>) || {};
-      const tagsList = a.tags ? a.tags.split(",").map((t) => t.trim()).filter(Boolean) : ["Campus", "BBST"];
+      const tagsList = a.tags ? a.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : ["Campus", "BBST"];
 
       // Generate structured sections for detail modal reader if content has paragraphs
       const paragraphs = (a.content || "")
         .replace(/<[^>]*>/g, "\n")
         .split("\n")
-        .map((p) => p.trim())
-        .filter((p) => p.length > 0);
+        .map((p: string) => p.trim())
+        .filter((p: string) => p.length > 0);
 
       return {
         id: a.id,
@@ -115,7 +146,15 @@ export async function GET(request: NextRequest) {
       articles,
       total: articles.length,
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "digest" in error &&
+      (error as { digest: string }).digest === "NEXT_PRERENDER_INTERRUPTED"
+    ) {
+      throw error;
+    }
     console.error("[Public Articles API] Error:", error);
     return NextResponse.json({ error: "Failed to fetch articles." }, { status: 500 });
   }

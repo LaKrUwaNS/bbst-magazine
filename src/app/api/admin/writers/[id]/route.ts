@@ -7,7 +7,7 @@ import { z } from "zod";
 
 const updateWriterSchema = z.object({
   name: z.string().trim().min(2).optional(),
-  slug: z.string().trim().optional(),
+  slug: z.string().trim().optional().nullable(),
   bio: z.string().trim().optional().nullable(),
   shortBio: z.string().trim().optional().nullable(),
   profileImageUrl: z.string().optional().nullable(),
@@ -22,20 +22,22 @@ const updateWriterSchema = z.object({
     .email("Valid email required")
     .optional()
     .nullable()
-    .or(z.literal("")),
+    .or(z.literal(""))
+    .or(z.null()),
   website: z
     .string()
     .trim()
     .url("Valid website URL required")
     .optional()
     .nullable()
-    .or(z.literal("")),
+    .or(z.literal(""))
+    .or(z.null()),
   socialLinks: z
     .object({
-      linkedin: z.string().trim().optional(),
-      twitter: z.string().trim().optional(),
-      github: z.string().trim().optional(),
-      website: z.string().trim().optional(),
+      linkedin: z.string().trim().optional().nullable(),
+      twitter: z.string().trim().optional().nullable(),
+      github: z.string().trim().optional().nullable(),
+      website: z.string().trim().optional().nullable(),
     })
     .optional()
     .nullable(),

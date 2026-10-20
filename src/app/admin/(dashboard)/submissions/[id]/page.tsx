@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import type { ArticleRevision } from "@prisma/client";
 import { ArticleReviewView } from "@/components/admin/article-review-view";
 
 export const metadata: Metadata = {
@@ -59,7 +60,7 @@ export default async function SubmissionReviewPage({
         createdAt: article.createdAt.toISOString(),
         updatedAt: article.updatedAt.toISOString(),
         category: article.category,
-        revisions: article.revisions.map((r) => ({
+        revisions: article.revisions.map((r: ArticleRevision) => ({
           id: r.id,
           title: r.title,
           excerpt: r.excerpt,
