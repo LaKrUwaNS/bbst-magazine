@@ -54,15 +54,17 @@ export function SuggestEventModal({ isOpen, onClose }: SuggestEventModalProps) {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch("/api/events/suggest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: email.split("@")[0] || "Event Organizer",
+          title: title.trim(),
+          category,
+          suggestedDate: suggestedDate.trim() || undefined,
+          venue: venue.trim() || undefined,
+          description: description.trim(),
           email: email.trim(),
-          subject: `Event Proposal: ${title.trim()}`,
-          category: "EVENT",
-          message: `Category: ${category}\nVenue: ${venue || "To be confirmed"}\nSuggested Date: ${suggestedDate || "Flexible"}\n\nDescription:\n${description.trim()}`,
+          organizerName: email.split("@")[0] || "Event Organizer",
         }),
       });
 

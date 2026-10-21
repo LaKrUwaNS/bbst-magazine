@@ -17,6 +17,7 @@ import {
   X,
   ShieldCheck,
   Mail,
+  Calendar,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -58,6 +59,12 @@ const NAV_ITEMS = [
     label: "Magazine Editions",
     href: "/admin/magazines",
     icon: BookOpen,
+    exact: false,
+  },
+  {
+    label: "Events Management",
+    href: "/admin/events",
+    icon: Calendar,
     exact: false,
   },
   {

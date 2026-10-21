@@ -3,6 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { BBST_MAGAZINES } from "../src/data/magazines.data";
 import { MOCK_CATEGORIES, MOCK_ARTICLES } from "../src/data/articles.mock";
+import { MOCK_EVENTS } from "../src/data/events.mock";
 import "dotenv/config";
 
 const connectionString = process.env.DATABASE_URL;
@@ -181,7 +182,91 @@ async function main() {
     });
   }
 
-  console.log("Database seeded successfully with categories, articles, authors, and magazines!");
+  // 5. Seed Events
+  console.log("Seeding events...");
+  for (const evt of MOCK_EVENTS) {
+    await prisma.event.upsert({
+      where: { slug: evt.slug },
+      update: {
+        title: evt.title,
+        excerpt: evt.excerpt,
+        description: evt.description,
+        category: evt.category,
+        categorySlug: evt.categorySlug,
+        coverImage: evt.coverImage,
+        startAt: new Date(evt.startAt),
+        endAt: new Date(evt.endAt),
+        timezone: evt.timezone,
+        venue: evt.venue,
+        organizer: evt.organizer,
+        participantCount: evt.participantCount || null,
+        capacity: evt.capacity || null,
+        audience: evt.audience || null,
+        agenda: (evt.agenda ?? null) as unknown as object,
+        tags: (evt.tags ?? []) as unknown as object,
+        isFeatured: evt.isFeatured || false,
+        publicationStatus: "PUBLISHED",
+      },
+      create: {
+        id: evt.id,
+        title: evt.title,
+        slug: evt.slug,
+        excerpt: evt.excerpt,
+        description: evt.description,
+        category: evt.category,
+        categorySlug: evt.categorySlug,
+        coverImage: evt.coverImage,
+        startAt: new Date(evt.startAt),
+        endAt: new Date(evt.endAt),
+        timezone: evt.timezone,
+        venue: evt.venue,
+        organizer: evt.organizer,
+        participantCount: evt.participantCount || null,
+        capacity: evt.capacity || null,
+        audience: evt.audience || null,
+        agenda: (evt.agenda ?? null) as unknown as object,
+        tags: (evt.tags ?? []) as unknown as object,
+        isFeatured: evt.isFeatured || false,
+        publicationStatus: "PUBLISHED",
+      },
+    });
+  }
+
+  // 6. Seed Sample Event Suggestions
+  console.log("Seeding sample event suggestions...");
+  await prisma.eventSuggestion.upsert({
+    where: { id: "sug-seed-01" },
+    update: {},
+    create: {
+      id: "sug-seed-01",
+      title: "Biosystems Nanotechnology Symposium",
+      category: "SEMINAR",
+      suggestedDate: "2026-11-20",
+      venue: "Main Auditorium",
+      description: "A student-led seminar on microfluidics and nanoscale biological materials with guest speakers from industry.",
+      organizerName: "Kasun Jayawardena",
+      organizerEmail: "kasun.j@std.uwu.ac.lk",
+      status: "PENDING",
+    },
+  });
+
+  await prisma.eventSuggestion.upsert({
+    where: { id: "sug-seed-02" },
+    update: {},
+    create: {
+      id: "sug-seed-02",
+      title: "Student Creative Writing Masterclass",
+      category: "WORKSHOP",
+      suggestedDate: "2026-11-25",
+      venue: "Smart Classroom B",
+      description: "Interactive session on scientific communication and popular science article writing for undergraduate researchers.",
+      organizerName: "Anuki Silva",
+      organizerEmail: "anuki.s@std.uwu.ac.lk",
+      status: "PENDING",
+    },
+  });
+
+  console.log("Database seeded successfully with categories, articles, authors, magazines, and events!");
 }
 
 main()

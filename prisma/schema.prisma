@@ -229,4 +229,54 @@ model NotificationLog {
   @@map("notification_log")
 }
 
+model Event {
+  id                 String           @id @default(uuid())
+  title              String
+  slug               String           @unique
+  excerpt            String?
+  description        String
+  category           String           @default("WORKSHOP") // WORKSHOP, SEMINAR, COMPETITION, PANEL DISCUSSION, CULTURAL, NETWORKING, COMMUNITY
+  categorySlug       String           @default("workshops")
+  coverImage         String?
+  coverImagePublicId String?
+  startAt            DateTime
+  endAt              DateTime
+  timezone           String           @default("Asia/Colombo")
+  venue              String
+  organizer          String
+  participantCount   String?
+  capacity           Int?
+  audience           String?
+  agenda             Json?            // Array of { time: string, title: string, speaker?: string }
+  tags               Json?            // string[] e.g. ["Robotics", "Automation"]
+  isFeatured         Boolean          @default(false)
+  publicationStatus  String           @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
+  suggestionId       String?          @unique
+  suggestion         EventSuggestion? @relation(fields: [suggestionId], references: [id], onDelete: SetNull)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
 
+  @@index([publicationStatus])
+  @@index([categorySlug])
+  @@index([startAt])
+  @@map("event")
+}
+
+model EventSuggestion {
+  id              String    @id @default(uuid())
+  title           String
+  category        String    @default("WORKSHOP")
+  suggestedDate   String?
+  venue           String?
+  description     String
+  organizerName   String?
+  organizerEmail  String
+  status          String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  rejectionReason String?
+  event           Event?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status])
+  @@map("event_suggestion")
+}
