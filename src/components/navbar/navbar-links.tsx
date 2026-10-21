@@ -29,7 +29,7 @@ export function NavbarLinks() {
   return (
     <nav
       aria-label="Main Navigation"
-      className="relative hidden lg:flex items-center p-1.5 bg-gray-100/90 rounded-full border border-gray-200/80 shadow-2xs gap-0.5"
+      className="relative hidden lg:flex items-center p-1 apple-glass-capsule rounded-full gap-0.5"
     >
       {NAV_LINKS.map((link) => {
         const isActive = isLinkActive(link.href);
@@ -38,10 +38,10 @@ export function NavbarLinks() {
           <Link
             key={link.href}
             href={link.href}
-            className={`relative flex items-center px-4 py-1.5 rounded-full text-xs font-semibold transition-colors duration-150 whitespace-nowrap cursor-pointer select-none isolate ${
+            className={`relative flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 whitespace-nowrap cursor-pointer select-none isolate ${
               isActive
-                ? "text-white font-bold"
-                : "text-gray-600 hover:text-gray-900 hover:bg-gray-200/60"
+                ? "text-black font-extrabold"
+                : "text-gray-600 hover:text-black hover:bg-white/60"
             }`}
           >
             {/* Single definitive Active Tab Spring Pill — only one link ever gets highlighted */}

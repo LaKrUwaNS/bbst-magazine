@@ -31,7 +31,7 @@ export function NavbarMobile({
   };
 
   return (
-    <div className="lg:hidden border-t border-gray-100 bg-white px-4 pt-3 pb-6 space-y-4 shadow-lg animate-in slide-in-from-top-2 duration-200">
+    <div className="lg:hidden apple-glass-drawer px-4 pt-3 pb-6 space-y-4 animate-in slide-in-from-top-2 duration-200">
       {/* Mobile Search */}
       <NavbarSearch isMobile onSearchSubmit={onClose} />
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowRight, Menu, X, Send } from "lucide-react";
@@ -15,6 +15,16 @@ export function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 8);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Remove main navigation bar from the editor views
   if (pathname.startsWith("/admin") || pathname === "/login") {
@@ -23,7 +33,11 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-2xs">
+      <header
+        className={`sticky top-0 z-40 w-full apple-glass-nav ${
+          scrolled ? "is-scrolled" : ""
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-17 sm:h-18 gap-3 lg:gap-4">
             {/* Zone 1: Left Brand Logo */}
@@ -43,7 +57,7 @@ export function Navbar() {
               {/* Submit Article CTA Button */}
               <Link
                 href="/submit-article"
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-[#00E500] hover:bg-[#00D000] text-black transition-all hover:scale-[1.02] active:scale-95 shadow-xs group cursor-pointer shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-[#00E500] hover:bg-[#00D000] text-black transition-all hover:scale-[1.02] active:scale-95 shadow-sm hover:shadow-[0_4px_14px_rgba(0,229,0,0.3)] border border-emerald-400/40 group cursor-pointer shrink-0"
               >
                 <span>Submit Article</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />

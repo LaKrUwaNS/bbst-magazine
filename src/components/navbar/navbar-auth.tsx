@@ -63,7 +63,7 @@ export function NavbarAuth({ isMobile = false, onNavigate }: NavbarAuthProps) {
     return (
       <Link
         href="/admin"
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full bg-emerald-50 text-emerald-900 border border-emerald-200 hover:bg-emerald-100/80 transition-colors shadow-2xs shrink-0"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full bg-emerald-500/10 text-emerald-950 border border-emerald-500/25 hover:bg-emerald-500/20 backdrop-blur-md transition-all shadow-2xs shrink-0"
         title="Open Editor Admin Dashboard"
       >
         <ShieldCheck className="w-3.5 h-3.5 text-[#00C800]" />
@@ -75,7 +75,7 @@ export function NavbarAuth({ isMobile = false, onNavigate }: NavbarAuthProps) {
   return (
     <Link
       href="/login"
-      className="px-3.5 py-1.5 text-xs font-semibold rounded-full border border-gray-200 text-[#171717] hover:bg-gray-50 transition-colors shadow-2xs shrink-0"
+      className="px-3.5 py-1.5 text-xs font-semibold rounded-full apple-glass-input text-gray-800 hover:text-black hover:bg-black/6 transition-all shadow-2xs shrink-0"
     >
       Login
     </Link>
