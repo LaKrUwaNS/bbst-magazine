@@ -20,6 +20,7 @@ export function SuggestEventModal({ isOpen, onClose }: SuggestEventModalProps) {
 
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Body scroll locking
   useEffect(() => {
@@ -43,14 +44,39 @@ export function SuggestEventModal({ isOpen, onClose }: SuggestEventModalProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !description.trim() || !email.trim()) {
       setError("Please complete all required fields.");
       return;
     }
     setError(null);
-    setSubmitted(true);
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: email.split("@")[0] || "Event Organizer",
+          email: email.trim(),
+          subject: `Event Proposal: ${title.trim()}`,
+          category: "EVENT",
+          message: `Category: ${category}\nVenue: ${venue || "To be confirmed"}\nSuggested Date: ${suggestedDate || "Flexible"}\n\nDescription:\n${description.trim()}`,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to submit event proposal.");
+      }
+
+      setSubmitted(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to send event proposal.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -62,6 +88,7 @@ export function SuggestEventModal({ isOpen, onClose }: SuggestEventModalProps) {
     setEmail("");
     setSubmitted(false);
     setError(null);
+    setIsSubmitting(false);
     onClose();
   };
 
@@ -275,17 +302,18 @@ export function SuggestEventModal({ isOpen, onClose }: SuggestEventModalProps) {
                   </div>
 
                   {/* Notice */}
-                  <p className="text-[10px] text-gray-400">
-                    * This is a frontend demo interface. Submissions will be persisted once backend API integration is deployed.
+                  <p className="text-[11px] text-gray-500">
+                    Your proposal will be transmitted directly to the BBST Editorial Board and an automated receipt will be emailed to your address.
                   </p>
 
                   {/* Submit Button */}
                   <div className="pt-2">
                     <button
                       type="submit"
-                      className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-[#00E500] hover:bg-[#00D000] text-black transition-all cursor-pointer shadow-xs"
+                      disabled={isSubmitting}
+                      className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-[#00E500] hover:bg-[#00D000] text-black transition-all cursor-pointer shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <span>Submit Event Proposal</span>
+                      <span>{isSubmitting ? "Submitting Proposal..." : "Submit Event Proposal"}</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>

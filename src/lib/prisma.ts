@@ -50,5 +50,6 @@ export type {
   EditorialActivity,
   AuditLog,
   User,
+  NotificationLog,
 } from "@prisma/client";
 

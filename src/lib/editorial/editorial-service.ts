@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
+import { sendArticleStatusNotification } from "@/lib/email/email-service";
 
 export type ArticleWorkflowStatus =
   | "SUBMITTED"
@@ -161,6 +162,53 @@ export async function createEditorArticle(
 
   const isPublished = status === "PUBLISHED";
 
+  let finalWriterId = input.writerId || null;
+  let resolvedAuthorName = input.authorName.trim();
+  let resolvedAuthorEmail = input.authorEmail?.trim().toLowerCase() || null;
+  let resolvedAuthorDept = input.authorDept?.trim() || null;
+
+  // If a writerId was specified, fetch writer details to ensure exact match and sync details
+  if (finalWriterId) {
+    const matchedWriter = await prisma.writerProfile.findUnique({
+      where: { id: finalWriterId },
+    });
+    if (matchedWriter) {
+      if (!resolvedAuthorName) resolvedAuthorName = matchedWriter.name;
+      if (!resolvedAuthorDept && matchedWriter.department) resolvedAuthorDept = matchedWriter.department;
+      if (!resolvedAuthorEmail && matchedWriter.email) resolvedAuthorEmail = matchedWriter.email;
+
+      // If the article is being published, ensure the writer profile is also in PUBLISHED status so it is publicly accessible
+      if (isPublished && matchedWriter.status !== "PUBLISHED") {
+        await prisma.writerProfile.update({
+          where: { id: matchedWriter.id },
+          data: { status: "PUBLISHED" },
+        }).catch(() => null);
+      }
+    }
+  } else if (resolvedAuthorName) {
+    // If no writerId was passed, attempt to auto-match with a registered writer by name or email
+    const autoMatched = await prisma.writerProfile.findFirst({
+      where: {
+        OR: [
+          { name: { equals: resolvedAuthorName, mode: "insensitive" as const } },
+          ...(resolvedAuthorEmail
+            ? [{ email: { equals: resolvedAuthorEmail, mode: "insensitive" as const } }]
+            : []),
+        ],
+      },
+    });
+
+    if (autoMatched) {
+      finalWriterId = autoMatched.id;
+      if (isPublished && autoMatched.status !== "PUBLISHED") {
+        await prisma.writerProfile.update({
+          where: { id: autoMatched.id },
+          data: { status: "PUBLISHED" },
+        }).catch(() => null);
+      }
+    }
+  }
+
   const article = await prisma.article.create({
     data: {
       title: input.title.trim(),
@@ -170,10 +218,10 @@ export async function createEditorArticle(
       coverImage: input.coverImage || null,
       coverImagePublicId: input.coverImagePublicId || null,
       status,
-      authorName: input.authorName.trim(),
-      authorEmail: input.authorEmail?.trim().toLowerCase() || null,
-      authorDept: input.authorDept?.trim() || null,
-      writerId: input.writerId || null,
+      authorName: resolvedAuthorName,
+      authorEmail: resolvedAuthorEmail,
+      authorDept: resolvedAuthorDept,
+      writerId: finalWriterId,
       categoryId: input.categoryId || null,
       tags: input.tags || null,
       isFeatured: Boolean(input.isFeatured),
@@ -196,7 +244,7 @@ export async function createEditorArticle(
     article.id,
     article.title,
     editorName,
-    `Entered by editor on behalf of ${input.authorName}. Status: ${status}`
+    `Entered by editor on behalf of ${resolvedAuthorName}. Status: ${status}${finalWriterId ? " (Linked to registered writer profile)" : ""}`
   );
 
   return article;
@@ -263,17 +311,47 @@ export async function executeReviewAction(input: ReviewActionInput) {
       break;
   }
 
+  // If publishing, link writer profile if available or auto-match, and ensure writer status is PUBLISHED
+  let writerIdToSet = current.writerId;
+  if (updatedStatus === "PUBLISHED") {
+    if (writerIdToSet) {
+      await prisma.writerProfile.update({
+        where: { id: writerIdToSet },
+        data: { status: "PUBLISHED" },
+      }).catch(() => null);
+    } else if (current.authorName) {
+      const autoMatched = await prisma.writerProfile.findFirst({
+        where: {
+          OR: [
+            { name: { equals: current.authorName.trim(), mode: "insensitive" as const } },
+            ...(current.authorEmail?.trim()
+              ? [{ email: { equals: current.authorEmail.trim(), mode: "insensitive" as const } }]
+              : []),
+          ],
+        },
+      });
+      if (autoMatched) {
+        writerIdToSet = autoMatched.id;
+        await prisma.writerProfile.update({
+          where: { id: autoMatched.id },
+          data: { status: "PUBLISHED" },
+        }).catch(() => null);
+      }
+    }
+  }
+
   const updated = await prisma.article.update({
     where: { id: input.articleId },
     data: {
       status: updatedStatus,
+      writerId: writerIdToSet,
       publishedAt,
       editorialFeedback,
       rejectionReason,
       reviewedBy: input.editorName,
       reviewedAt: new Date(),
     },
-    include: { category: true, revisions: { orderBy: { createdAt: "desc" } } },
+    include: { category: true, writer: true, revisions: { orderBy: { createdAt: "desc" } } },
   });
 
   await logEditorialActivity(
@@ -284,6 +362,27 @@ export async function executeReviewAction(input: ReviewActionInput) {
     input.editorName,
     input.feedback || input.reason || `Status updated to ${updatedStatus}`
   );
+
+  // Trigger author status change email notification safely in background
+  if (
+    ["APPROVED", "PUBLISHED", "REVISION_REQUESTED", "REJECTED"].includes(updatedStatus) &&
+    updated.authorEmail &&
+    updated.submissionRef
+  ) {
+    sendArticleStatusNotification({
+      authorName: updated.authorName,
+      authorEmail: updated.authorEmail,
+      articleTitle: updated.title,
+      submissionRef: updated.submissionRef,
+      status: updatedStatus as "APPROVED" | "PUBLISHED" | "REVISION_REQUESTED" | "REJECTED",
+      editorialFeedback: updated.editorialFeedback,
+      rejectionReason: updated.rejectionReason,
+      slug: updated.slug,
+      articleId: updated.id,
+    }).catch((emailErr) => {
+      console.error("[executeReviewAction] Failed to dispatch article status email:", emailErr);
+    });
+  }
 
   return updated;
 }
@@ -333,6 +432,9 @@ export async function resubmitArticle(
       coverImagePublicId: data.coverImagePublicId || current.coverImagePublicId,
       status: "SUBMITTED", // Returns to review queue
       submittedAt: new Date(),
+    },
+    include: {
+      category: true,
     },
   });
 

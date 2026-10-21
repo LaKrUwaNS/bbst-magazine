@@ -216,3 +216,17 @@ model AuditLog {
   @@map("audit_log")
 }
 
+model NotificationLog {
+  id          String   @id @default(uuid())
+  recipient   String
+  type        String   // SUBMISSION_CONFIRMATION, SUBMISSION_EDITOR_ALERT, STATUS_UPDATE, CONTACT_MESSAGE, PASSWORD_RESET, MAGAZINE_ALERT, SYSTEM_TEST
+  subject     String
+  status      String   // SENT, FAILED, SIMULATED
+  error       String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@map("notification_log")
+}
+
+

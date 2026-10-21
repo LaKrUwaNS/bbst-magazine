@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { RichTextEditor } from "@/components/editor/rich-text-editor";
@@ -25,7 +26,13 @@ interface CategoryOption {
 }
 
 export function SubmitArticleForm() {
-  const [activeTab, setActiveTab] = useState<"submit" | "track">("submit");
+  const searchParams = useSearchParams();
+  const refParam = searchParams.get("ref")?.trim() || "";
+  const trackParam = searchParams.get("track");
+
+  const [activeTab, setActiveTab] = useState<"submit" | "track">(() =>
+    refParam || trackParam === "1" ? "track" : "submit"
+  );
 
   // Categories loaded from DB
   const [categories, setCategories] = useState<CategoryOption[]>([]);
@@ -57,8 +64,8 @@ export function SubmitArticleForm() {
   } | null>(null);
 
   // Tracking State
-  const [trackRef, setTrackRef] = useState("");
-  const [trackingLoading, setTrackingLoading] = useState(false);
+  const [trackRef, setTrackRef] = useState(() => refParam);
+  const [trackingLoading, setTrackingLoading] = useState(() => Boolean(refParam));
   const [trackError, setTrackError] = useState("");
   const [trackedSubmission, setTrackedSubmission] = useState<{
     ref: string;
@@ -82,6 +89,27 @@ export function SubmitArticleForm() {
   const [revisedContent, setRevisedContent] = useState("");
   const [revisedTitle, setRevisedTitle] = useState("");
   const [resubmitSuccess, setResubmitSuccess] = useState(false);
+
+  // Adjust state during render when URL query parameters change across navigations
+  const [prevRefParam, setPrevRefParam] = useState(refParam);
+  if (refParam !== prevRefParam) {
+    setPrevRefParam(refParam);
+    if (refParam) {
+      setActiveTab("track");
+      setTrackRef(refParam);
+      setTrackingLoading(true);
+      setTrackError("");
+      setTrackedSubmission(null);
+    }
+  }
+
+  const [prevTrackParam, setPrevTrackParam] = useState(trackParam);
+  if (trackParam !== prevTrackParam) {
+    setPrevTrackParam(trackParam);
+    if (trackParam === "1") {
+      setActiveTab("track");
+    }
+  }
 
   // Fetch categories on mount
   useEffect(() => {
@@ -204,10 +232,9 @@ export function SubmitArticleForm() {
     }
   };
 
-  // Track Submission Handler
-  const handleTrackSubmission = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!trackRef.trim()) return;
+  // Track Submission Fetcher for manual search
+  const fetchTrackRef = useCallback(async (refToSearch: string) => {
+    if (!refToSearch.trim()) return;
 
     setTrackingLoading(true);
     setTrackError("");
@@ -215,7 +242,7 @@ export function SubmitArticleForm() {
     setResubmitSuccess(false);
 
     try {
-      const res = await fetch(`/api/articles/track?ref=${encodeURIComponent(trackRef.trim())}`);
+      const res = await fetch(`/api/articles/track?ref=${encodeURIComponent(refToSearch.trim())}`);
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || "Submission not found.");
@@ -229,6 +256,48 @@ export function SubmitArticleForm() {
     } finally {
       setTrackingLoading(false);
     }
+  }, []);
+
+  // Automatically load tracked submission when ref is present in URL
+  useEffect(() => {
+    if (!refParam) return;
+
+    let ignore = false;
+
+    async function loadTrackedSubmission() {
+      try {
+        const res = await fetch(`/api/articles/track?ref=${encodeURIComponent(refParam)}`);
+        const data = await res.json();
+        if (ignore) return;
+        if (!res.ok) {
+          throw new Error(data.error || "Submission not found.");
+        }
+        setTrackedSubmission(data.submission);
+        setRevisedTitle(data.submission.title);
+        setRevisedContent(data.submission.content);
+      } catch (err: unknown) {
+        if (ignore) return;
+        const msg = err instanceof Error ? err.message : "Failed to find submission.";
+        setTrackError(msg);
+      } finally {
+        if (!ignore) {
+          setTrackingLoading(false);
+        }
+      }
+    }
+
+    loadTrackedSubmission();
+
+    return () => {
+      ignore = true;
+    };
+  }, [refParam]);
+
+  // Track Submission Form Handler
+  const handleTrackSubmission = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!trackRef.trim()) return;
+    await fetchTrackRef(trackRef);
   };
 
   // Resubmit Revised Draft Handler

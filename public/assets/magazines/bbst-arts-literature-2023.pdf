@@ -1,21 +1,210 @@
 %PDF-1.4
-1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
-2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj
-3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >> endobj
-4 0 obj << /Length 304 >> stream
-BT /F1 24 Tf 50 720 Td (BBST Arts & Literature Anthology 2023) Tj 0 -36 Td /F1 14 Tf (Student Poetry, Prose & Landscape Photography) Tj 0 -28 Td /F1 11 Tf (Official Student Publication - Faculty of Technological Studies, Uva Wellassa University) Tj 0 -20 Td (Visit: http://localhost:3000/magazines) Tj ET
+%âãÏÓ
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R 9 0 R 11 0 R] /Count 4 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 6 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+6 0 obj
+<< /Length 763 >>
+stream
+q
+0.0 0.8 0.2 rg
+40 805 515 4 re f
+0.95 0.95 0.95 rg
+40 765 515 35 re f
+Q
+BT
+/F1 10 Tf
+0.3 0.3 0.3 rg
+1 0 0 1 45 778 Tm
+(BBST ARTS & LITERATURE ANTHOLOGY 2023) Tj
+/F1 20 Tf
+0.09 0.09 0.09 rg
+1 0 0 1 45 730 Tm
+(Echoes of the Valley -- Arts & Literature 2023) Tj
+/F1 11 Tf
+0.0 0.55 0.2 rg
+1 0 0 1 45 704 Tm
+(Creative Voices from the Technological Community) Tj
+/F2 10 Tf
+0.2 0.2 0.2 rg
+1 0 0 1 45 669 Tm
+(Bridging science and the humanities: poetry, essays, and campus photography.) Tj
+1 0 0 1 45 647 Tm
+(An artistic tribute to the natural beauty and academic spirit of Uva.) Tj
+ET
+q
+0.85 0.85 0.85 rg
+40 50 515 1 re f
+Q
+BT
+/F1 8 Tf
+0.5 0.5 0.5 rg
+1 0 0 1 45 35 Tm
+(BBST Magazine  |  Page 1 of 4  |  Faculty of Technological Studies, Uva Wellassa University) Tj
+ET
 endstream
 endobj
-5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 8 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+8 0 obj
+<< /Length 714 >>
+stream
+q
+0.0 0.8 0.2 rg
+40 805 515 4 re f
+0.95 0.95 0.95 rg
+40 765 515 35 re f
+Q
+BT
+/F1 10 Tf
+0.3 0.3 0.3 rg
+1 0 0 1 45 778 Tm
+(BBST ARTS & LITERATURE ANTHOLOGY 2023) Tj
+/F1 20 Tf
+0.09 0.09 0.09 rg
+1 0 0 1 45 730 Tm
+(Poetry from the Mist -- Montane Reflections) Tj
+/F1 11 Tf
+0.0 0.55 0.2 rg
+1 0 0 1 45 704 Tm
+(Student Poetry Collection) Tj
+/F2 10 Tf
+0.2 0.2 0.2 rg
+1 0 0 1 45 669 Tm
+(Verses written amidst morning fog on the Passara hills.) Tj
+1 0 0 1 45 647 Tm
+(Themes of discovery, perseverance, and curiosity in the laboratory.) Tj
+ET
+q
+0.85 0.85 0.85 rg
+40 50 515 1 re f
+Q
+BT
+/F1 8 Tf
+0.5 0.5 0.5 rg
+1 0 0 1 45 35 Tm
+(BBST Magazine  |  Page 2 of 4  |  Faculty of Technological Studies, Uva Wellassa University) Tj
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 10 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+10 0 obj
+<< /Length 723 >>
+stream
+q
+0.0 0.8 0.2 rg
+40 805 515 4 re f
+0.95 0.95 0.95 rg
+40 765 515 35 re f
+Q
+BT
+/F1 10 Tf
+0.3 0.3 0.3 rg
+1 0 0 1 45 778 Tm
+(BBST ARTS & LITERATURE ANTHOLOGY 2023) Tj
+/F1 20 Tf
+0.09 0.09 0.09 rg
+1 0 0 1 45 730 Tm
+(Visual Gallery: Wildlife and Campus Architecture) Tj
+/F1 11 Tf
+0.0 0.55 0.2 rg
+1 0 0 1 45 704 Tm
+(Photographic Portfolio) Tj
+/F2 10 Tf
+0.2 0.2 0.2 rg
+1 0 0 1 45 669 Tm
+(Capturing endemic bird species around the university reservoir.) Tj
+1 0 0 1 45 647 Tm
+(Modern concrete architecture nestled in verdant highland greenery.) Tj
+ET
+q
+0.85 0.85 0.85 rg
+40 50 515 1 re f
+Q
+BT
+/F1 8 Tf
+0.5 0.5 0.5 rg
+1 0 0 1 45 35 Tm
+(BBST Magazine  |  Page 3 of 4  |  Faculty of Technological Studies, Uva Wellassa University) Tj
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 12 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>
+endobj
+12 0 obj
+<< /Length 722 >>
+stream
+q
+0.0 0.8 0.2 rg
+40 805 515 4 re f
+0.95 0.95 0.95 rg
+40 765 515 35 re f
+Q
+BT
+/F1 10 Tf
+0.3 0.3 0.3 rg
+1 0 0 1 45 778 Tm
+(BBST ARTS & LITERATURE ANTHOLOGY 2023) Tj
+/F1 20 Tf
+0.09 0.09 0.09 rg
+1 0 0 1 45 730 Tm
+(Concluding Notes from the Editorial Guild) Tj
+/F1 11 Tf
+0.0 0.55 0.2 rg
+1 0 0 1 45 704 Tm
+(Preserving Creative Expression in STEM) Tj
+/F2 10 Tf
+0.2 0.2 0.2 rg
+1 0 0 1 45 669 Tm
+(Thank you to all contributors who shared their art and stories.) Tj
+1 0 0 1 45 647 Tm
+(Uva Wellassa University Student Publications Guild 2023.) Tj
+ET
+q
+0.85 0.85 0.85 rg
+40 50 515 1 re f
+Q
+BT
+/F1 8 Tf
+0.5 0.5 0.5 rg
+1 0 0 1 45 35 Tm
+(BBST Magazine  |  Page 4 of 4  |  Faculty of Technological Studies, Uva Wellassa University) Tj
+ET
+endstream
+endobj
 xref
-0 6
+0 13
 0000000000 65535 f 
-0000000009 00000 n 
-0000000058 00000 n 
-0000000115 00000 n 
-0000000244 00000 n 
-0000000300 00000 n 
-trailer << /Size 6 /Root 1 0 R >>
+0000000019 00000 n 
+0000000068 00000 n 
+0000000144 00000 n 
+0000000219 00000 n 
+0000000289 00000 n 
+0000000425 00000 n 
+0000001238 00000 n 
+0000001374 00000 n 
+0000002138 00000 n 
+0000002275 00000 n 
+0000003049 00000 n 
+0000003187 00000 n 
+trailer
+<< /Size 13 /Root 1 0 R >>
 startxref
-380
+3960
 %%EOF

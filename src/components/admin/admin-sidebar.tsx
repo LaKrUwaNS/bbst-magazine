@@ -16,6 +16,7 @@ import {
   Menu,
   X,
   ShieldCheck,
+  Mail,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -63,6 +64,12 @@ const NAV_ITEMS = [
     label: "Categories",
     href: "/admin/categories",
     icon: Layers,
+    exact: false,
+  },
+  {
+    label: "Email & Notifications",
+    href: "/admin/email",
+    icon: Mail,
     exact: false,
   },
 ];

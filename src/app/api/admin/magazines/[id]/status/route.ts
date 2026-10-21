@@ -3,6 +3,7 @@ import { getAdminSession } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { sendMagazinePublishedAlert } from "@/lib/email/email-service";
 
 const toggleStatusSchema = z.object({
   status: z.enum(["draft", "published", "archived"]),
@@ -43,6 +44,19 @@ export async function PATCH(
       where: { id },
       data: { status },
     });
+
+    if (status === "published" && existing.status !== "published") {
+      sendMagazinePublishedAlert({
+        issueTitle: updated.title,
+        issueNumber: updated.edition || "Current Edition",
+        description: updated.description,
+        coverImageUrl: updated.coverImage,
+        slug: updated.slug,
+        downloadUrl: updated.pdfAsset,
+      }).catch((emailErr) => {
+        console.error("[AdminMagazines API] Failed to dispatch publication email:", emailErr);
+      });
+    }
 
     revalidatePath("/magazines");
     revalidatePath(`/magazines/${existing.slug}`);

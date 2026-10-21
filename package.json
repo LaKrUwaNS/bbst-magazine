@@ -10,9 +10,19 @@
     "start": "next start",
     "lint": "eslint",
     "test": "tsx scripts/verify-system.ts",
+    "test:email": "tsx scripts/verify-email-system.ts",
     "seed": "tsx prisma/seed.ts",
     "hash-password": "node scripts/generate-hash.mjs",
-    "db:migrate:deploy": "prisma migrate deploy"
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:status": "docker compose ps",
+    "db:logs": "docker compose logs -f db",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -35,6 +45,8 @@
     "isomorphic-dompurify": "^4.6.0",
     "lucide-react": "^1.55.0",
     "next": "16.4.0",
+    "nodemailer": "^10.1.7",
+    "pdfjs-dist": "^4.10.38",
     "pg": "^8.23.1",
     "prisma": "^7.10.0",
     "react": "19.3.0",
@@ -48,6 +60,7 @@
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
