@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { submitArticle } from "@/lib/editorial/editorial-service";
 import { sanitizeHtml } from "@/lib/sanitize";
+import { sendArticleSubmissionEmails } from "@/lib/email/email-service";
 
 // In-memory sliding window rate limiter for submissions
 const submissionIpMap = new Map<string, { count: number; expiresAt: number }>();
@@ -97,6 +98,20 @@ export async function POST(request: NextRequest) {
       coverImagePublicId: data.coverImagePublicId,
       tags: data.tags,
     });
+
+    // Safely dispatch email confirmations without blocking or crashing on network/SMTP failure
+    if (article.authorEmail && article.submissionRef) {
+      sendArticleSubmissionEmails({
+        authorName: article.authorName,
+        authorEmail: article.authorEmail,
+        articleTitle: article.title,
+        submissionRef: article.submissionRef,
+        category: article.category?.name,
+        articleId: article.id,
+      }).catch((emailErr) => {
+        console.error("[Article Submit API] Error dispatching notification emails:", emailErr);
+      });
+    }
 
     return NextResponse.json({
       success: true,

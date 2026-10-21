@@ -16,6 +16,8 @@ import {
   Menu,
   X,
   ShieldCheck,
+  Mail,
+  Calendar,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -60,9 +62,21 @@ const NAV_ITEMS = [
     exact: false,
   },
   {
+    label: "Events Management",
+    href: "/admin/events",
+    icon: Calendar,
+    exact: false,
+  },
+  {
     label: "Categories",
     href: "/admin/categories",
     icon: Layers,
+    exact: false,
+  },
+  {
+    label: "Email & Notifications",
+    href: "/admin/email",
+    icon: Mail,
     exact: false,
   },
 ];

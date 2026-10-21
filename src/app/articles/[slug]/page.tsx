@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { ArticleAuthorCard } from "@/components/articles/article-author-card";
 import { ArrowLeft, Calendar, Tag } from "lucide-react";
 import { MOCK_ARTICLES } from "@/data/articles.mock";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 
 type ArticleDetail = Prisma.ArticleGetPayload<{
@@ -218,7 +219,7 @@ export default async function ArticleDetailPage({
         {article.content ? (
           <div
             className="prose prose-sm sm:prose-base lg:prose-lg max-w-none text-gray-800 leading-relaxed pt-2"
-            dangerouslySetInnerHTML={{ __html: article.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.content) }}
           />
         ) : (
           <p className="text-gray-500 italic">No content available.</p>

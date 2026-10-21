@@ -54,6 +54,8 @@ export async function GET(request: NextRequest) {
         { title: { contains: query, mode: "insensitive" } },
         { excerpt: { contains: query, mode: "insensitive" } },
         { authorName: { contains: query, mode: "insensitive" } },
+        { writer: { name: { contains: query, mode: "insensitive" } } },
+        { authorDept: { contains: query, mode: "insensitive" } },
         { tags: { contains: query, mode: "insensitive" } },
       ];
     }

@@ -32,6 +32,7 @@ export function PublicFooter() {
           <Link href="/writers" className="hover:text-black transition-colors">Writers</Link>
           <Link href="/events" className="hover:text-black transition-colors">Events</Link>
           <Link href="/about" className="hover:text-black transition-colors">About</Link>
+          <Link href="/contact" className="hover:text-black transition-colors">Contact</Link>
         </div>
         <p className="text-xs text-gray-400 text-center md:text-right">
           &copy; 2025 BBST Magazine. All rights reserved.

@@ -6,7 +6,6 @@ import {
   EventFilter,
   EventSortOption,
 } from "@/types/event";
-import { eventRepository } from "@/lib/events/event-repository";
 import { EventsHero } from "./events-hero";
 import { EventsToolbar } from "./events-toolbar";
 import { UpcomingEventsSection } from "./upcoming-events-section";
@@ -18,7 +17,19 @@ import { EventDetailModal } from "./event-detail-modal";
 import { SuggestEventModal } from "./suggest-event-modal";
 import { Filter, X } from "lucide-react";
 
-export function EventsView() {
+interface EventsViewProps {
+  initialEvents?: MagazineEvent[];
+  initialPastEvents?: MagazineEvent[];
+  initialUpcomingThisMonth?: MagazineEvent[];
+  initialDateKeys?: string[];
+}
+
+export function EventsView({
+  initialEvents = [],
+  initialPastEvents = [],
+  initialUpcomingThisMonth = [],
+  initialDateKeys = [],
+}: EventsViewProps) {
   const [, startTransition] = useTransition();
 
   // Filters & State
@@ -33,50 +44,39 @@ export function EventsView() {
   );
 
   // Data states
-  const [events, setEvents] = useState<MagazineEvent[]>([]);
-  const [pastEvents, setPastEvents] = useState<MagazineEvent[]>([]);
-  const [upcomingThisMonth, setUpcomingThisMonth] = useState<MagazineEvent[]>(
-    []
-  );
-  const [eventDateKeys, setEventDateKeys] = useState<Set<string>>(new Set());
+  const [events, setEvents] = useState<MagazineEvent[]>(initialEvents);
+  const [pastEvents] = useState<MagazineEvent[]>(initialPastEvents);
+  const [upcomingThisMonth] = useState<MagazineEvent[]>(initialUpcomingThisMonth);
+  const [eventDateKeys] = useState<Set<string>>(new Set(initialDateKeys));
 
   // Modal states
   const [activeEvent, setActiveEvent] = useState<MagazineEvent | null>(null);
   const [suggestModalOpen, setSuggestModalOpen] = useState(false);
-
-  // Initial load for sidebar widgets & calendar
-  useEffect(() => {
-    async function loadInitialData() {
-      const [past, thisMonth, dateKeys] = await Promise.all([
-        eventRepository.getPastEvents(4),
-        eventRepository.getUpcomingThisMonth(2025, 9, 3), // October 2025
-        eventRepository.getAllEventDateKeys(),
-      ]);
-
-      setPastEvents(past);
-      setUpcomingThisMonth(thisMonth);
-      setEventDateKeys(dateKeys);
-    }
-    loadInitialData();
-  }, []);
 
   // Fetch filtered events whenever filters change
   useEffect(() => {
     let isCancelled = false;
 
     async function fetchFilteredEvents() {
-      const results = await eventRepository.getEvents({
-        filter,
-        category: selectedCategory,
-        search: searchQuery,
-        sort: currentSort,
-        selectedDate,
-      });
+      try {
+        const params = new URLSearchParams();
+        if (filter && filter !== "all") params.set("filter", filter);
+        if (selectedCategory) params.set("category", selectedCategory);
+        if (searchQuery.trim()) params.set("search", searchQuery.trim());
+        if (currentSort) params.set("sort", currentSort);
+        if (selectedDate) params.set("date", selectedDate);
 
-      if (!isCancelled) {
-        startTransition(() => {
-          setEvents(results);
-        });
+        const res = await fetch(`/api/events?${params.toString()}`);
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (!isCancelled && data.success && Array.isArray(data.events)) {
+          startTransition(() => {
+            setEvents(data.events);
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch filtered events:", err);
       }
     }
 

@@ -100,37 +100,45 @@ export default async function WriterDetailPage({
   const { slug } = await params;
 
   let rawWriter = null;
+  let rawArticles: RawWriterArticleItem[] = [];
+
   try {
     rawWriter = await prisma.writerProfile.findFirst({
       where: {
         slug: { equals: slug, mode: "insensitive" },
         status: "PUBLISHED",
       },
-      include: {
-        articles: {
-          where: {
-            status: { in: ["PUBLISHED", "published"] },
-          },
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-            excerpt: true,
-            coverImage: true,
-            publishedAt: true,
-            createdAt: true,
-            category: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-              },
+    });
+
+    if (rawWriter) {
+      // Find all published articles connected to this exact writer via writerId or authorName
+      rawArticles = await prisma.article.findMany({
+        where: {
+          status: { in: ["PUBLISHED", "published"] },
+          OR: [
+            { writerId: rawWriter.id },
+            { authorName: { equals: rawWriter.name, mode: "insensitive" } },
+          ],
+        },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          coverImage: true,
+          publishedAt: true,
+          createdAt: true,
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
             },
           },
-          orderBy: { publishedAt: "desc" },
         },
-      },
-    });
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      });
+    }
   } catch (error) {
     console.error(`[WriterDetailPage] Error loading writer ${slug} from DB:`, error);
   }
@@ -160,8 +168,8 @@ export default async function WriterDetailPage({
     email: rawWriter.email,
     socialLinks: (rawWriter.socialLinks as Record<string, string>) || {},
     isFeatured: rawWriter.isFeatured,
-    publishedArticlesCount: rawWriter.articles.length,
-    articles: rawWriter.articles.map((art: RawWriterArticleItem) => ({
+    publishedArticlesCount: rawArticles.length,
+    articles: rawArticles.map((art: RawWriterArticleItem) => ({
       id: art.id,
       title: art.title,
       slug: art.slug,

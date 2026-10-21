@@ -32,7 +32,9 @@ pool.on("error", (err: Error) => {
 const adapter = new PrismaPg(pool);
 
 export const prisma =
-  globalForPrisma.prisma ?? new PrismaClient({ adapter });
+  globalForPrisma.prisma && "event" in (globalForPrisma.prisma as unknown as Record<string, unknown>)
+    ? globalForPrisma.prisma
+    : new PrismaClient({ adapter });
 
 // Cache both prisma and pool on globalThis for development HMR and warm serverless container reuse
 globalForPrisma.prisma = prisma;
@@ -50,5 +52,6 @@ export type {
   EditorialActivity,
   AuditLog,
   User,
+  NotificationLog,
 } from "@prisma/client";
 

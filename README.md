@@ -28,6 +28,7 @@
 | 🔑  | **Authentication** | Better Auth                                   |
 | ✅  | **Validation**     | Zod and React Hook Form                       |
 | ☁️  | **Storage**        | Cloudinary (for PDFs and images)              |
+| 📧  | **Email Delivery** | Node.js & Nodemailer (Gmail SMTP Relay)       |
 | ✍️  | **Editor**         | Tiptap (Rich-text editor)                     |
 
 ---
@@ -89,17 +90,27 @@ Copy `.env.example` to `.env` and fill in the required values:
 cp .env.example .env
 ```
 
-### 3️⃣ Database setup
+### 3️⃣ Start the local database (Docker)
 
-Apply Prisma migrations and generate the Prisma Client:
+Start PostgreSQL using Docker Compose:
 
 ```bash
-npx prisma generate
-npx prisma db push
-# or npx prisma migrate dev
+npm run db:up
+# or: docker compose up -d db
 ```
 
-### 4️⃣ Run the development server
+> **Tip:** To also start pgAdmin (available at [http://localhost:5050](http://localhost:5050)), run `npm run docker:up`.
+
+### 4️⃣ Database schema & seed data
+
+Sync the Prisma schema and seed the initial categories, articles, and admin credentials:
+
+```bash
+npm run db:push
+npm run seed
+```
+
+### 5️⃣ Run the development server
 
 ```bash
 npm run dev
@@ -125,6 +136,52 @@ The following essential packages are used in this project (as listed in `package
 
 ---
 
+## 📧 Email System & Gmail SMTP Integration
+
+The platform includes a complete, enterprise-grade transactional email system built using **Node.js and Nodemailer with Gmail SMTP**.
+
+### 🌟 Supported Real Workflows
+- **Article Submissions**: Automated receipt with tracking reference to the author + immediate review alert to the editorial board.
+- **Editorial Review Status Updates**: Automated author notifications on `APPROVED`, `PUBLISHED` (with live article URL), `REVISION_REQUESTED` (with editorial feedback block & resubmission CTA), and `REJECTED`.
+- **Contact Desk & Event Proposals**: Transmitted to `EDITOR_NOTIFICATION_EMAIL` with sender `replyTo` + branded receipt confirmation dispatched to sender.
+- **Magazine Release Broadcast**: Dispatched when an issue's status is toggled to `published`.
+- **Administrative Password Recovery**: Single-use 256-bit cryptographically secure reset links with SHA-256 token hashing, 30-minute expiry, and account enumeration protection.
+- **Email Diagnostics Dashboard**: Accessible at `/admin/email` to test SMTP connectivity, send diagnostic test emails, and review the live `NotificationLog` audit trail.
+
+### ⚙️ Required Environment Variables
+
+```env
+# Gmail SMTP Relay Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=ceylonnest.org@gmail.com
+SMTP_PASSWORD=your_new_gmail_app_password
+EMAIL_FROM_NAME=BBST Magazine
+EMAIL_FROM=ceylonnest.org@gmail.com
+EDITOR_NOTIFICATION_EMAIL=ceylonnest.org@gmail.com
+```
+
+### 🔑 Gmail App Password Setup Instructions
+1. Log in to the Google account for `ceylonnest.org@gmail.com`.
+2. Navigate to **Google Account Settings** &rarr; **Security**.
+3. Under *How you sign in to Google*, ensure **2-Step Verification** is turned **ON**.
+4. Search for or navigate to **App passwords** (`https://myaccount.google.com/apppasswords`).
+5. Enter an app name (e.g. `BBST Magazine Mailer`) and click **Create**.
+6. Copy the generated 16-character password into your `.env` as `SMTP_PASSWORD` (remove any spaces).
+
+> 💡 **Development Simulation Mode**: When `SMTP_PASSWORD` is left as a placeholder or empty, the transporter safely switches to **SIMULATED** mode. Email payloads and recipient logs are recorded cleanly in the database (`notification_log`) without throwing unhandled exceptions.
+
+### 🧪 Running Email System Tests
+
+```bash
+# Run the 25-check comprehensive email verification test suite
+npm run test:email
+```
+
+---
+
 ## 📖 Documentation
 
 > 🤖 **`AGENTS.md`**: Contains essential rules for architecture, database, security, and project guidelines.
+

@@ -45,28 +45,6 @@ export async function GET(
         socialLinks: true,
         isFeatured: true,
         createdAt: true,
-        articles: {
-          where: {
-            status: { in: ["PUBLISHED", "published"] },
-          },
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-            excerpt: true,
-            coverImage: true,
-            publishedAt: true,
-            createdAt: true,
-            category: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-              },
-            },
-          },
-          orderBy: { publishedAt: "desc" },
-        },
       },
     });
 
@@ -85,6 +63,34 @@ export async function GET(
       );
     }
 
+    // Fetch all published articles written by or linked to this exact writer
+    const writerArticles = await prisma.article.findMany({
+      where: {
+        status: { in: ["PUBLISHED", "published"] },
+        OR: [
+          { writerId: writer.id },
+          { authorName: { equals: writer.name, mode: "insensitive" } },
+        ],
+      },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        excerpt: true,
+        coverImage: true,
+        publishedAt: true,
+        createdAt: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+    });
+
     const formattedWriter = {
       id: writer.id,
       name: writer.name,
@@ -101,8 +107,8 @@ export async function GET(
       website: writer.website,
       socialLinks: (writer.socialLinks as Record<string, string>) || {},
       isFeatured: writer.isFeatured,
-      publishedArticlesCount: writer.articles.length,
-      articles: writer.articles.map((art: WriterArticleSummary) => ({
+      publishedArticlesCount: writerArticles.length,
+      articles: writerArticles.map((art: WriterArticleSummary) => ({
         id: art.id,
         title: art.title,
         slug: art.slug,

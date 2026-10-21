@@ -170,12 +170,20 @@ export function AdminLoginCard() {
 
             {/* Password field */}
             <div className="space-y-1.5">
-              <label
-                htmlFor="password"
-                className="block text-xs font-bold text-gray-700 tracking-tight"
-              >
-                Editor Password
-              </label>
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="password"
+                  className="block text-xs font-bold text-gray-700 tracking-tight"
+                >
+                  Editor Password
+                </label>
+                <Link
+                  href="/admin/forgot-password"
+                  className="text-xs font-semibold text-[#00873D] hover:text-black transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
                 <input
                   id="password"

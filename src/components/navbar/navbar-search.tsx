@@ -34,7 +34,7 @@ export function NavbarSearch({
         placeholder={isMobile ? "Search articles, topics..." : "Search..."}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className={`text-xs rounded-full border border-gray-200 bg-gray-50/80 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#00E500] focus:border-transparent transition-all placeholder:text-gray-400 text-gray-900 ${
+        className={`text-xs rounded-full apple-glass-input focus:outline-none placeholder:text-gray-400 text-gray-900 ${
           isMobile
             ? "w-full pl-9 pr-3 py-2 text-sm rounded-xl"
             : "w-36 md:w-44 xl:w-52 pl-8 pr-3 py-1.5"

@@ -16,6 +16,7 @@ import {
   ExternalLink,
   History,
   PenSquare,
+  Calendar,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -34,6 +35,19 @@ interface DashboardRecentSubmission {
 
 export default async function AdminDashboardPage() {
   const stats = await getEditorialDashboardStats();
+
+  let publishedEvents = 0;
+  let pendingSuggestions = 0;
+  try {
+    const [evtCount, sugCount] = await Promise.all([
+      prisma.event.count({ where: { publicationStatus: "PUBLISHED" } }),
+      prisma.eventSuggestion.count({ where: { status: "PENDING" } }),
+    ]);
+    publishedEvents = evtCount;
+    pendingSuggestions = sugCount;
+  } catch (err) {
+    console.error("[AdminDashboard] Error loading event metrics:", err);
+  }
 
   let recentMagazines: AdminMagazine[] = [];
   try {
@@ -116,7 +130,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Real Database Metrics Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 sm:gap-4">
         {/* Metric 1: Pending Reviews */}
         <Link
           href="/admin/submissions?status=SUBMITTED"
@@ -247,6 +261,30 @@ export default async function AdminDashboardPage() {
             Published Issues
           </span>
           <span className="text-[10px] text-gray-400 block mt-1">Live editions</span>
+        </Link>
+
+        {/* Metric 7: Campus Events */}
+        <Link
+          href="/admin/events"
+          className="p-5 rounded-2xl bg-white border border-gray-200/90 shadow-2xs hover:border-emerald-300 transition-all group col-span-2 sm:col-span-1"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-800">
+              <Calendar className="w-4 h-4 text-[#00C800]" />
+            </div>
+            <span className="text-[10px] font-bold uppercase text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full">
+              Events
+            </span>
+          </div>
+          <span className="text-2xl font-black text-[#171717] block">
+            {publishedEvents}
+          </span>
+          <span className="text-xs font-bold text-gray-700 block mt-0.5">
+            Campus Events
+          </span>
+          <span className="text-[10px] text-gray-400 block mt-1">
+            {pendingSuggestions > 0 ? `${pendingSuggestions} pending proposals` : "Live schedule"}
+          </span>
         </Link>
       </div>
 

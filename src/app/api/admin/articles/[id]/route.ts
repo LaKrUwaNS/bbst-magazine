@@ -144,7 +144,26 @@ export async function PATCH(
     if (data.authorName !== undefined) updatePayload.authorName = data.authorName;
     if (data.authorEmail !== undefined) updatePayload.authorEmail = data.authorEmail || null;
     if (data.authorDept !== undefined) updatePayload.authorDept = data.authorDept;
-    if (data.writerId !== undefined) updatePayload.writerId = data.writerId || null;
+
+    if (data.writerId !== undefined) {
+      updatePayload.writerId = data.writerId || null;
+    } else if (data.authorName && !existing.writerId) {
+      // Auto-match if writerId was not explicitly set but authorName is provided
+      const autoMatched = await prisma.writerProfile.findFirst({
+        where: {
+          OR: [
+            { name: { equals: data.authorName.trim(), mode: "insensitive" as const } },
+            ...(data.authorEmail?.trim()
+              ? [{ email: { equals: data.authorEmail.trim(), mode: "insensitive" as const } }]
+              : []),
+          ],
+        },
+      });
+      if (autoMatched) {
+        updatePayload.writerId = autoMatched.id;
+      }
+    }
+
     if (data.categoryId !== undefined) updatePayload.categoryId = data.categoryId;
     if (data.coverImage !== undefined) updatePayload.coverImage = data.coverImage;
     if (data.coverImagePublicId !== undefined) {
@@ -162,11 +181,24 @@ export async function PATCH(
     if (data.editorialNotes !== undefined) updatePayload.editorialNotes = data.editorialNotes;
     if (data.submissionSource !== undefined) updatePayload.submissionSource = data.submissionSource;
 
+    const isBecomingPublished =
+      (data.status === "PUBLISHED" || (!data.status && existing.status === "PUBLISHED"));
+
     if (data.status !== undefined) {
       updatePayload.status = data.status;
       if (data.status === "PUBLISHED" && !existing.publishedAt) {
         updatePayload.publishedAt = new Date();
       }
+    }
+
+    // Ensure linked writer profile is active if article is published
+    const finalLinkedWriterId =
+      (updatePayload.writerId !== undefined ? updatePayload.writerId : existing.writerId) as string | null;
+    if (finalLinkedWriterId && isBecomingPublished) {
+      await prisma.writerProfile.update({
+        where: { id: finalLinkedWriterId },
+        data: { status: "PUBLISHED" },
+      }).catch(() => null);
     }
 
     const updated = await prisma.article.update({

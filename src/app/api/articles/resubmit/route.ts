@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { resubmitArticle } from "@/lib/editorial/editorial-service";
 import { sanitizeHtml } from "@/lib/sanitize";
+import { sendArticleSubmissionEmails } from "@/lib/email/email-service";
 
 const resubmitSchema = z.object({
   submissionRef: z.string().trim().min(5, "Valid submission reference is required"),
@@ -32,6 +33,19 @@ export async function POST(request: NextRequest) {
       coverImage: data.coverImage,
       coverImagePublicId: data.coverImagePublicId,
     });
+
+    if (updated.authorEmail && updated.submissionRef) {
+      sendArticleSubmissionEmails({
+        authorName: updated.authorName,
+        authorEmail: updated.authorEmail,
+        articleTitle: `${updated.title} (Revised Draft)`,
+        submissionRef: updated.submissionRef,
+        category: updated.category?.name,
+        articleId: updated.id,
+      }).catch((emailErr) => {
+        console.error("[Article Resubmit API] Error dispatching notification emails:", emailErr);
+      });
+    }
 
     return NextResponse.json({
       success: true,
